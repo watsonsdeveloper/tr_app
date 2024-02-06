@@ -1,5 +1,7 @@
+import 'package:tr_app/domain/entities/user.dart';
+
 abstract class UserRepository {
-//   Future<User> findUserById(String id);
-//   Future<void> saveUser(User user);
-  Future<String?> authenticate(String username, String password);
+  User? getUser();
+  Future<void> saveUser(User user);
+  Future<void> deleteUser();
 }
