@@ -10,15 +10,15 @@ class OrderUseCase {
   OrderUseCase(this._orderService);
 
   Future<List<OrderBatch>> getOrderBatchList(
-      String storeId, Brand brand, TrOrderBatchStatus status) async {
+      String storeId, Brand brand, TrOrderStatus status, String? pluOrBarcode) async {
     try {
-      return _orderService.getOrderBatchList(storeId, brand, status);
+      return _orderService.getOrderBatchList(storeId, brand, status, pluOrBarcode);
     } catch (e) {
       throw Exception(e.toString());
     }
   }
 
-  Future<List<Order>> getOrderList(String trOrderBatchId, String storeId,
+  Future<List<Order>> getOrderList(int trOrderBatchId, String storeId,
       Brand brand, TrOrderStatus status, String? pluOrBarcode) async {
     try {
       return _orderService.getOrderList(

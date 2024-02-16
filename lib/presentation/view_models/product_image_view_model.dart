@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/use_cases/product_use_case.dart';
 
@@ -22,6 +23,8 @@ class ProductImageNotifier extends StateNotifier<ProductImageState> {
       : super(ProductImageState(productImageMap: {}));
 
   Future<String> getProductImageUrl(String plu) async {
+    debugPrint('ProductImageNotifier @ getProductImageUrl: $plu');
+
     if (state.productImageMap[plu] != null &&
         state.productImageMap[plu]!.isNotEmpty) {
       return state.productImageMap[plu]!;
@@ -36,7 +39,6 @@ class ProductImageNotifier extends StateNotifier<ProductImageState> {
     return productImageUrl ?? '';
   }
 }
-
 
 // var cachedImageList = <String, String>{};
 //       for (var tr in trList) {

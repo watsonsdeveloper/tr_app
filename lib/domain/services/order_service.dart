@@ -5,9 +5,9 @@ import 'package:tr_app/utils/constants/enum_constants.dart';
 
 abstract class OrderService {
   Future<List<OrderBatch>> getOrderBatchList(
-      String storeId, Brand brand, TrOrderBatchStatus status);
+      String storeId, Brand brand, TrOrderStatus status, String? pluOrBarcode);
 
-  Future<List<Order>> getOrderList(String trOrderBatchId, String storeId,
+  Future<List<Order>> getOrderList(int trOrderBatchId, String storeId,
       Brand brand, TrOrderStatus status, String? pluOrBarcode);
 
   Future<Order> getOrder(String trOrderId, String storeId);

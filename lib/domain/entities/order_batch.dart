@@ -1,8 +1,8 @@
 import 'package:tr_app/utils/constants/enum_constants.dart';
 
 class OrderBatch {
-  final String trOrderBatchId;
-  final TrOrderBatchStatus status;
+  final int trOrderBatchId;
+  final TrOrderBatchStatus trOrderBatchStatus;
   final int storeId;
   final Brand brand;
   final DateTime createdAt;
@@ -12,7 +12,7 @@ class OrderBatch {
 
   OrderBatch({
     required this.trOrderBatchId,
-    required this.status,
+    required this.trOrderBatchStatus,
     required this.storeId,
     required this.brand,
     required this.createdAt,
@@ -24,7 +24,7 @@ class OrderBatch {
   factory OrderBatch.fromJson(Map<String, dynamic> json) {
     return OrderBatch(
       trOrderBatchId: json['trOrderBatchId'],
-      status: TrOrderBatchStatus.values[json['status']],
+      trOrderBatchStatus: TrOrderBatchStatus.values[json['trOrderBatchStatus']],
       storeId: json['storeId'],
       brand: Brand.values[json['brand']],
       createdAt: DateTime.parse(json['createdAt']),

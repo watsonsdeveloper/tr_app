@@ -11,7 +11,7 @@ class Order {
   final String? justification;
   final String supplierName;
   final String supplierCode;
-  final TrOrderStatus status;
+  final TrOrderStatus trOrderStatus;
   final String? createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -25,7 +25,7 @@ class Order {
     required this.brandName,
     required this.supplierName,
     required this.supplierCode,
-    required this.status,
+    required this.trOrderStatus,
     this.createdAt,
     this.reason,
     this.justification,
@@ -47,7 +47,7 @@ class Order {
       justification: json['justification'],
       supplierName: json['supplierName'],
       supplierCode: json['supplierCode'],
-      status: TrOrderStatus.values[json['status']],
+      trOrderStatus: TrOrderStatus.values[json['trOrderStatus']],
       createdBy: json['createdBy'],
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,

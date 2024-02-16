@@ -20,10 +20,10 @@ class HomeScreen extends HookConsumerWidget {
         'home_screen.dart @ selectedBrand : ${userState.user?.selectedBrand}');
 
     Future<void> selectBrand(Brand selectedBrand) async {
-      await userNotifier.selectBrand(selectedBrand);
+      // await userNotifier.selectBrand(selectedBrand);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushNamedAndRemoveUntil(context, Routes.testerRequestListing,
-            (Route<dynamic> route) => true);
+            (Route<dynamic> route) => false);
       });
     }
 
@@ -36,7 +36,7 @@ class HomeScreen extends HookConsumerWidget {
       Navigator.pushNamedAndRemoveUntil(
         context,
         Routes.login,
-        (Route<dynamic> route) => Navigator.canPop(context),
+        (Route<dynamic> route) => false,
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -49,7 +49,6 @@ class HomeScreen extends HookConsumerWidget {
     }
 
     return NavigationScreen(
-      title: selectedBrand == Brand.own ? 'Own Brand' : 'A Brand',
       selectedIndex: 1,
       onItemTapped: (index) {
         debugPrint('index : $index');
@@ -84,9 +83,9 @@ class HomeScreen extends HookConsumerWidget {
               ElevatedButton(
                 onPressed: () {
                   if (userState.isLoading) return;
-                  if (selectedBrand != Brand.supplier) {
-                    selectBrand(Brand.supplier);
-                  }
+                  // if (selectedBrand != Brand.supplier) {
+                  //   selectBrand(Brand.supplier);
+                  // }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: selectedBrand != Brand.supplier
@@ -103,27 +102,27 @@ class HomeScreen extends HookConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBoxHeight(),
-              const SizedBoxHeight(),
-              const SizedBoxHeight(),
-              ElevatedButton(
-                onPressed: logout,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[300],
-                  minimumSize: const Size(120, 48),
-                ),
-                child: const Text(
-                  'Log Out',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBoxHeight(),
-              if (userState.errorMessage != null)
-                Text(userState.errorMessage!,
-                    style: const TextStyle(color: Colors.red)),
-              const SizedBoxHeight(),
+              // const SizedBoxHeight(),
+              // const SizedBoxHeight(),
+              // const SizedBoxHeight(),
+              // ElevatedButton(
+              //   onPressed: logout,
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: Colors.grey[300],
+              //     minimumSize: const Size(120, 48),
+              //   ),
+              //   child: const Text(
+              //     'Log Out',
+              //     style: TextStyle(
+              //       color: Colors.white,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBoxHeight(),
+              // if (userState.errorMessage != null)
+              //   Text(userState.errorMessage!,
+              //       style: const TextStyle(color: Colors.red)),
+              // const SizedBoxHeight(),
             ],
           ),
         ),

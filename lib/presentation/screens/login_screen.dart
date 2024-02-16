@@ -29,8 +29,8 @@ class LoginScreen extends HookConsumerWidget {
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.pushNamedAndRemoveUntil(
         context,
-        Routes.home,
-        (Route<dynamic> route) => Navigator.canPop(context),
+        Routes.testerRequest,
+        (Route<dynamic> route) => false,
       );
       // });
     }

@@ -5,7 +5,7 @@ class User {
   final String? username;
   final String? password;
   final String? token;
-  final String? storeId;
+  final String storeId;
   final String? storeName;
   final String? ip;
   final String? loginTime;

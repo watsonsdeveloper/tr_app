@@ -25,17 +25,17 @@ void showCartDetail(BuildContext context) {
     builder: (BuildContext context) {
       return HookConsumer(
         builder: (context, ref, child) {
-          // final ReasonState reasonState = ref.watch(reasonStateProvider);
-          final reasonState = useState(ReasonState.none);
+          // final Reason reasonState = ref.watch(reasonStateProvider);
+          final reasonState = useState(Reason.none);
           final errorState = useState<String>('');
-          final images = ref.watch(imagesProvider);
+          final uploadedImages = ref.watch(uploadedImagesProvider);
 
           void submit() {
             if (formKey.currentState!.validate()) {}
             final FormState? form = formKey.currentState;
-            if (reasonState.value == ReasonState.none) {
+            if (reasonState.value == Reason.none) {
               errorState.value = 'Please select item status.';
-            } else if (images.isEmpty) {
+            } else if (uploadedImages.isEmpty) {
               errorState.value = 'Please take a picture.';
             } else {
               errorState.value = '';
@@ -47,11 +47,11 @@ void showCartDetail(BuildContext context) {
             data: Theme.of(context).copyWith(
               splashColor: Theme.of(context).primaryColor.withOpacity(0.5),
             ),
-            child: Form(
-              key: formKey,
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.8,
-                child: SingleChildScrollView(
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -70,55 +70,87 @@ void showCartDetail(BuildContext context) {
                         ),
                       ),
                       const PreviewCameraImageWidget(),
-                      RadioListTile<ReasonState>(
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 16),
+                        child: TextFormField(
+                          maxLength: 250,
+                          maxLines: 3,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter note.';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      RadioListTile<Reason>(
+                        title: Text(
+                          'New Listing',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: reasonState.value == Reason.newListing
+                                ? Theme.of(context).primaryColor
+                                : Colors.black,
+                          ),
+                        ),
+                        value: Reason.newListing,
+                        groupValue: reasonState.value,
+                        onChanged: (Reason? value) {
+                          reasonState.value = value!;
+                        },
+                        controlAffinity: ListTileControlAffinity.trailing,
+                        selectedTileColor: Theme.of(context).primaryColor,
+                      ),
+                      RadioListTile<Reason>(
                         title: Text(
                           'Depleted',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: reasonState.value == ReasonState.depleted
+                            color: reasonState.value == Reason.depleted
                                 ? Theme.of(context).primaryColor
                                 : Colors.black,
                           ),
                         ),
-                        value: ReasonState.depleted,
+                        value: Reason.depleted,
                         groupValue: reasonState.value,
-                        onChanged: (ReasonState? value) {
+                        onChanged: (Reason? value) {
                           reasonState.value = value!;
                         },
                         controlAffinity: ListTileControlAffinity.trailing,
                         selectedTileColor: Theme.of(context).primaryColor,
                       ),
-                      RadioListTile<ReasonState>(
+                      RadioListTile<Reason>(
                         title: Text(
                           'Damaged',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: reasonState.value == ReasonState.damaged
+                            color: reasonState.value == Reason.damaged
                                 ? Theme.of(context).primaryColor
                                 : Colors.black,
                           ),
                         ),
-                        value: ReasonState.damaged,
+                        value: Reason.damaged,
                         groupValue: reasonState.value,
-                        onChanged: (ReasonState? value) {
+                        onChanged: (Reason? value) {
                           reasonState.value = value!;
                         },
                         controlAffinity: ListTileControlAffinity.trailing,
                         selectedTileColor: Theme.of(context).primaryColor,
                       ),
-                      RadioListTile<ReasonState>(
+                      RadioListTile<Reason>(
                         title: Text(
                           'Missing',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: reasonState.value == ReasonState.missing
+                            color: reasonState.value == Reason.missing
                                 ? Theme.of(context).primaryColor
                                 : Colors.black,
                           ),
                         ),
-                        value: ReasonState.missing,
+                        value: Reason.missing,
                         groupValue: reasonState.value,
-                        onChanged: (ReasonState? value) {
+                        onChanged: (Reason? value) {
                           reasonState.value = value!;
                         },
                         controlAffinity: ListTileControlAffinity.trailing,

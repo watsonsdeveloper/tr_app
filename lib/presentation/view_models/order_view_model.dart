@@ -15,7 +15,7 @@ final orderNotifierProvider = StateNotifierProvider<OrderNotifier, OrderState>(
 );
 
 class OrderState {
-  final String? orderBatchId;
+  final int? orderBatchId;
   final List<Order>? orderList;
   final String? errorMessage;
   final bool isLoading;
@@ -28,7 +28,7 @@ class OrderState {
   });
 
   OrderState copyWith({
-    String? orderBatchId,
+    int? orderBatchId,
     List<Order>? orderList,
     String? errorMessage,
     bool? isLoading,
@@ -48,13 +48,13 @@ class OrderNotifier extends StateNotifier<OrderState> {
 
   OrderNotifier(this._user, this._orderUseCase) : super(OrderState());
 
-  Future<bool> updateState(String orderBatchId) async {
+  Future<bool> updateState(int orderBatchId) async {
     state = state.copyWith(orderBatchId: orderBatchId);
     return true;
   }
 
   Future<List<Order>> list(
-      String orderBatchId, TrOrderStatus? status, String? pluOrBarcode) async {
+      int orderBatchId, TrOrderStatus? status, String? pluOrBarcode) async {
     try {
       if (_user == null || _user.storeId == null) {
         state = state.copyWith(

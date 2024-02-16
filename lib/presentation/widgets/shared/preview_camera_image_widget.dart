@@ -3,31 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-final imagesProvider = StateProvider<List<File>>((ref) => []);
+final uploadedImagesProvider = StateProvider<List<File>>((ref) => []);
 
 class PreviewCameraImageWidget extends HookConsumerWidget {
   const PreviewCameraImageWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final imagesState = ref.watch(imagesProvider);
+    final imagesState = ref.watch(uploadedImagesProvider);
 
     Future takePhoto() async {
       final pickedFile =
           await ImagePicker().pickImage(source: ImageSource.camera);
 
       if (pickedFile != null) {
-        final currentList = ref.read(imagesProvider.notifier).state;
+        final currentList = ref.read(uploadedImagesProvider.notifier).state;
         final updatedList = List<File>.from(currentList)
           ..add(File(pickedFile.path));
-        ref.read(imagesProvider.notifier).state = updatedList;
+        ref.read(uploadedImagesProvider.notifier).state = updatedList;
       }
     }
 
     Future removePhoto(File image) async {
-      final currentList = ref.read(imagesProvider.notifier).state;
+      final currentList = ref.read(uploadedImagesProvider.notifier).state;
       final updatedList = List<File>.from(currentList)..remove(image);
-      ref.read(imagesProvider.notifier).state = updatedList;
+      ref.read(uploadedImagesProvider.notifier).state = updatedList;
     }
 
     return SizedBox(

@@ -13,13 +13,12 @@ final orderServiceProvider = Provider<OrderService>((ref) {
 });
 
 final orderUseCaseProvider = Provider<OrderUseCase>((ref) {
-  return OrderUseCase(ref.watch(orderServiceProvider));
+  return OrderUseCase(ref.read(orderServiceProvider));
 });
 
 final orderBatchFutureProvider = FutureProvider.autoDispose<List<OrderBatch>>(
   (ref) async {
-    final orderBatchState = ref.watch(orderBatchNotifierProvider);
-    return orderBatchState.orderBatchList ?? [];
+    return ref.watch(orderBatchNotifierProvider).orderBatchList ?? [];
   },
 );
 

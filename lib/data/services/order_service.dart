@@ -58,19 +58,23 @@ class OrderServiceImpl implements OrderService {
   }
 
   @override
-  Future<List<OrderBatch>> getOrderBatchList(
-      String storeId, Brand brand, TrOrderBatchStatus status) async {
+  Future<List<OrderBatch>> getOrderBatchList(String storeId, Brand brand,
+      TrOrderStatus status, String? pluOrBarcode) async {
     try {
       Map<String, dynamic> request = {
         "storeId": storeId,
         "brand": brand.index,
         "status": status.index
       };
+      if (pluOrBarcode != null) {
+        request["pluOrBarcode"] = pluOrBarcode;
+      }
       final jsonData = jsonEncode(request);
       debugPrint(jsonData);
       Response<dynamic> response = await _dio
           .post('/mobileApi/trOrder/getTrOrderBatchList', data: jsonData);
       if (response.statusCode == 200) {
+        debugPrint('getOrderBatchList @ ${response.data.toString()}');
         if (response.data["isSuccess"]) {
           return (response.data["data"] as List)
               .map((e) => OrderBatch.fromJson(e))
@@ -86,7 +90,7 @@ class OrderServiceImpl implements OrderService {
   }
 
   @override
-  Future<List<Order>> getOrderList(String trOrderBatchId, String storeId,
+  Future<List<Order>> getOrderList(int trOrderBatchId, String storeId,
       Brand brand, TrOrderStatus status, String? pluOrBarcode) async {
     try {
       Map<String, dynamic> request = {

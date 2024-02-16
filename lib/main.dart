@@ -16,6 +16,7 @@ import 'package:tr_app/presentation/screens/tester_request_listing_screen.dart';
 import 'package:tr_app/presentation/screens/scan_ip_screen.dart';
 import 'package:tr_app/presentation/screens/tester_request_screen.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
+import 'package:tr_app/presentation/widgets/tester_request_widgets/tester_request_searching_widget.dart';
 import 'package:tr_app/utils/constants/hive_constants.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
 
@@ -35,11 +36,12 @@ class TrApp extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userNotifierProvider.select((state) => state.user));
-    final storeIP = ref.watch(globalSNP.select((state) => state.storeIP));
+    final user = ref.read(userNotifierProvider.select((state) => state.user));
+    final storeIP = ref.read(globalSNP.select((state) => state.storeIP));
 
     debugPrint('main.dart @ storeIP: $storeIP');
     debugPrint('main.dart @ user: ${user?.toJson()}');
+    debugPrint('main.dart @ build');
 
     return MaterialApp(
       title: 'Tr App',
@@ -91,12 +93,12 @@ class TrApp extends HookConsumerWidget {
         ),
         useMaterial3: true,
       ),
-      home: storeIP == null
-          ? ScanIPScreen()
-          : user?.token != null
-              ? const HomeScreen()
-              : LoginScreen(),
-      // home: TestScreen(),
+      // home: storeIP == null
+      //     ? ScanIPScreen()
+      //     : user?.token != null
+      //         ? const TesterRequestScreen()
+      //         : LoginScreen(),
+      home: TesterRequestScreen(),
     );
   }
 }

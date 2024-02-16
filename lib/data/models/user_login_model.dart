@@ -8,7 +8,7 @@ class UserLoginModel {
   final bool? firstLogin;
   final bool? passwordExpired;
   final bool? allowChangePassword;
-  final String? storeCode;
+  final String storeCode;
   final String? storeName;
   final String? ip;
   final String? loginTime;
@@ -23,7 +23,7 @@ class UserLoginModel {
     this.firstLogin = false,
     this.passwordExpired = false,
     this.allowChangePassword = false,
-    this.storeCode = '',
+    required this.storeCode,
     this.storeName = '',
     this.ip = '',
     this.loginTime = '',

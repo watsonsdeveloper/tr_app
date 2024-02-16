@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/entities/order.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
-import 'package:tr_app/utils/constants/routes_constants.dart';
+import 'package:tr_app/presentation/widgets/product_image_loader_widget.dart';
 
 class OrderListWidget extends HookConsumerWidget {
   const OrderListWidget({super.key});
@@ -53,56 +53,79 @@ class OrderListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushNamed(context, Routes.order);
-        });
+    return
+        // InkWell(
+        //   onTap: () {
+        //     WidgetsBinding.instance.addPostFrameCallback((_) {
+        //       Navigator.pushNamed(context, Routes.order);
+        //     });
+        //   },
+        //   child:
+        ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      scrollDirection: Axis.vertical,
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        return OrderItemWidget(list[index]);
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          scrollDirection: Axis.vertical,
-          itemCount: list.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _dataRow('Plu', list[index].plu),
-                  _dataRow('Product Name', list[index].productName),
-                  _dataRow('Brand', list[index].brandName),
-                  _dataRow(
-                      'Supplier Code', list[index].supplierCode.toString()),
-                  _dataRow(
-                      'Supplier Name', list[index].supplierName.toString()),
-                  _dataRow('Created At', list[index].createdAt.toString()),
-                  _dataRow('Created By', list[index].createdBy.toString()),
-                  _dataRow('Status', list[index].status.name.toUpperCase()),
-                ],
-              ),
-            );
-          },
-          separatorBuilder: (context, index) {
-            if (index != 2) {
-              return Divider(
-                color: Colors.grey.shade200,
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          },
-        ),
-      ),
+      separatorBuilder: (context, index) {
+        if (index != 2) {
+          return Divider(
+            color: Colors.grey.shade200,
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+
+      // ),
     );
   }
+}
 
-  _dataRow(String title, String value) {
-    return Padding(
+class OrderItemWidget extends StatelessWidget {
+  final Order order;
+
+  const OrderItemWidget(this.order, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        ProductImageLoader(order.plu),
+        OrderItemDataRow('Plu', order.plu),
+        OrderItemDataRow('Product Name', order.productName),
+        OrderItemDataRow('Brand', order.brandName),
+        OrderItemDataRow('Supplier Code', order.supplierCode.toString()),
+        OrderItemDataRow('Supplier Name', order.supplierName.toString()),
+        // OrderItemDataRow('Created At', order.createdAt.toString()),
+        order.reason != null
+            ? OrderItemDataRow('Reason', order.reason.toString())
+            : const SizedBox(),
+        order.justification != null
+            ? OrderItemDataRow('Justification', order.justification.toString())
+            : const SizedBox(),
+        OrderItemDataRow('Created By', order.createdBy.toString()),
+        OrderItemDataRow('Status', order.trOrderStatus.name.toUpperCase()),
+      ],
+    );
+  }
+}
+
+class OrderItemDataRow extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const OrderItemDataRow(this.title, this.value, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.7,
+      // width: 300,
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,

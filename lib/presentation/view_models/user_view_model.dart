@@ -84,9 +84,12 @@ class UserNotifier extends StateNotifier<UserState> {
     return isLogout;
   }
 
-  Future<void> selectBrand(Brand selectedBrand) async {
+  Future<void> toggleBrand() async {
     try {
-      final user = state.user!.copyWith(selectedBrand: selectedBrand);
+      final user = state.user!.copyWith(
+          selectedBrand: state.user?.selectedBrand == Brand.own
+              ? Brand.supplier
+              : Brand.own);
       state = state.copyWith(user: user);
     } catch (e) {
       state = state.copyWith(

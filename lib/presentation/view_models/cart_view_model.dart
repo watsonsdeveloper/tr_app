@@ -11,8 +11,8 @@ import 'package:tr_app/presentation/view_models/user_view_model.dart';
 final cartNotifierProvider = StateNotifierProvider<CartNotifier, CartState>(
   (ref) {
     final user = ref.watch(userNotifierProvider).user;
-    final cartUseCase = ref.watch(cartUseCaseProvider);
-    final orderUseCase = ref.watch(orderUseCaseProvider);
+    final cartUseCase = ref.read(cartUseCaseProvider);
+    final orderUseCase = ref.read(orderUseCaseProvider);
     return CartNotifier(user, cartUseCase, orderUseCase);
   },
 );
@@ -40,6 +40,14 @@ class CartState {
     );
   }
 
+  CartState clearErrorMessage() {
+    return CartState(
+      carts: carts,
+      errorMessage: null,
+      isLoading: isLoading,
+    );
+  }
+
   CartState resetState() {
     return CartState(
       carts: [],
@@ -56,29 +64,40 @@ class CartNotifier extends StateNotifier<CartState> {
 
   CartNotifier(this._user, this._cartUseCase, this._orderUseCase)
       : super(CartState()) {
+    // Future.delayed(const Duration(seconds: 0)).then((_) {
+    //   list();
+    // });
+    // if(_cartUseCase != null || this._orderUseCase == null) {
     list();
+    // }
+  }
+
+  clearErrorMessage() {
+    state = state.clearErrorMessage();
   }
 
   resetState() {
     state = state.resetState();
   }
 
-  Future<void> list() async {
+  Future<List<Cart>?> list() async {
+    debugPrint('CartNotifier.list');
     try {
-      if (_user == null || _user.storeId == null) {
+      if (_user == null) {
         state = state.copyWith(
             errorMessage: 'User or storeId is null', isLoading: false);
-        return;
+        return null;
       }
-      state = state.copyWith(isLoading: true);
+      // state = state.copyWith(isLoading: true);
       final cartList =
           await _cartUseCase.getCarts(_user.storeId!, _user.selectedBrand);
-      debugPrint('cartList: $cartList');
       state = state.copyWith(carts: cartList, isLoading: false);
+      return cartList;
     } catch (e) {
       state = state.copyWith(
           errorMessage: e.toString().replaceAll('Exception: ', ''),
           isLoading: false);
+      return null;
     }
   }
 
@@ -96,7 +115,6 @@ class CartNotifier extends StateNotifier<CartState> {
           carts: [addedCart, ...state.carts],
           isLoading: false,
           errorMessage: null);
-      state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -113,7 +131,7 @@ class CartNotifier extends StateNotifier<CartState> {
             errorMessage: 'User or storeId is null', isLoading: false);
         return false;
       }
-      state = state.copyWith(isLoading: true);
+      // state = state.copyWith(isLoading: true);
       final isRemoved = await _cartUseCase.removeCart(_user.storeId!, trCartId);
       if (isRemoved) {
         state = state.copyWith(
@@ -134,9 +152,10 @@ class CartNotifier extends StateNotifier<CartState> {
   Future<bool> addCartToOrder() async {
     try {
       final cartList = await _orderUseCase.addCartToOrder(
-          state.carts, _user!.storeId!, _user.selectedBrand, _user.username!);
+          state.carts, _user!.storeId, _user.selectedBrand, _user.username!);
       state = state.copyWith(carts: cartList, isLoading: false);
-      return true;
+      return !cartList
+          .any((c) => c.errorMessage != null && c.errorMessage!.isNotEmpty);
     } catch (e) {
       state = state.copyWith(
           errorMessage: e.toString().replaceAll('Exception: ', ''),

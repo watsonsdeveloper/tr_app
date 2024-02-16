@@ -4,6 +4,6 @@ enum TrOrderStatus { all, pending, approved, rejected }
 
 enum TrOrderBatchStatus { all, pending, completed, overdue }
 
-enum ReasonState { none, damaged, depleted, missing }
+enum Reason { none, newListing, damaged, depleted, missing }
 
 enum Brand { _, own, supplier }

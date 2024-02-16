@@ -50,6 +50,8 @@ class Cart {
         brand: Brand.values[json['brand']],
         reason: json['reason'],
         justification: json['justification'],
+        requireJustify: json['requireJustify'],
+        isAvailableStock: json['isAvailableStock'],
         supplierName: json['supplierName'],
         supplierCode: json['supplierCode'],
         createdBy: json['createdBy'],

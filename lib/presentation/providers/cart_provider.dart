@@ -17,8 +17,16 @@ final cartUseCaseProvider = Provider<CartUseCase>((ref) {
 
 final cartFutureProvider = FutureProvider.autoDispose<List<Cart>>((ref) async {
   try {
-    final cartState = ref.watch(cartNotifierProvider);
-    return cartState.carts;
+    // await Future.delayed(const Duration(seconds: 0));
+    // await ref.read(cartNotifierProvider.notifier).list();
+    // return ref.watch(cartNotifierProvider.select(
+    //   (value) => value.carts,
+    // ));
+    // ref.watch(userNotifierProvider).user?.selectedBrand;
+    // await ref.read(cartNotifierProvider.notifier).list();
+
+    // final carts = ref.watch(cartNotifierProvider).carts;
+    return ref.watch(cartNotifierProvider).carts;
   } catch (e) {
     throw Exception(e.toString());
   }
@@ -26,8 +34,7 @@ final cartFutureProvider = FutureProvider.autoDispose<List<Cart>>((ref) async {
 
 final cartDetailFutureProvider = FutureProvider.autoDispose<Cart?>((ref) async {
   try {
-    final cartDetailState = ref.watch(cartDetailNotifierProvider);
-    return cartDetailState.cart;
+    return ref.watch(cartDetailNotifierProvider).cart;
   } catch (e) {
     throw Exception(e.toString());
   }
