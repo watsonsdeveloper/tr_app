@@ -22,7 +22,7 @@ class OrderServiceImpl implements OrderService {
       List<Cart> carts, String storeId, Brand brand, String createdBy) async {
     try {
       Map<String, dynamic> request = {
-        "trCartDtoList": carts,
+        // "trCartDtoList": carts,
         "storeId": storeId,
         "brand": brand.index,
         "createdBy": createdBy
@@ -74,7 +74,6 @@ class OrderServiceImpl implements OrderService {
       Response<dynamic> response = await _dio
           .post('/mobileApi/trOrder/getTrOrderBatchList', data: jsonData);
       if (response.statusCode == 200) {
-        debugPrint('getOrderBatchList @ ${response.data.toString()}');
         if (response.data["isSuccess"]) {
           return (response.data["data"] as List)
               .map((e) => OrderBatch.fromJson(e))
@@ -105,7 +104,6 @@ class OrderServiceImpl implements OrderService {
           await _dio.post('/mobileApi/trOrder/getTrOrderList', data: jsonData);
       if (response.statusCode == 200) {
         if (response.data["isSuccess"]) {
-          debugPrint(response.data["data"].toString());
           return (response.data["data"] as List)
               .map((e) => Order.fromJson(e))
               .toList();

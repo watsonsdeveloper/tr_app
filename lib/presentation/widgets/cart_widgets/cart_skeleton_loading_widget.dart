@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tr_app/presentation/widgets/shared/skeleton_loading_widgets/view_loading.dart';
 
 class CartSkeletonLoadingWidget extends StatelessWidget {
+  const CartSkeletonLoadingWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(

@@ -140,4 +140,31 @@ class CartServiceImpl implements CartService {
       return throw Exception(e.toString());
     }
   }
+
+  @override
+  Future<Cart> updateCartRequirement(String storeId, int trCartId,
+      String username, Reason reason, String? justification) async {
+    try {
+      Map<String, dynamic> parameters = {
+        "storeId": storeId,
+        "trCartId": trCartId,
+        "reason": reason.index,
+        "justification": justification,
+        "updatedBy": username
+      };
+      final jsonBody = jsonEncode(parameters);
+      Response<dynamic> response = await _dio
+          .post('/mobileApi/trCart/updateTrCartRequirement', data: jsonBody);
+      if (response.statusCode == 200) {
+        if (response.data["isSuccess"]) {
+          return Cart.fromJson(response.data["data"]);
+        } else {
+          throw Exception(response.data["errorMessage"]);
+        }
+      }
+      return throw Exception(response.data);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
 }

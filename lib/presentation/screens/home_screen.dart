@@ -49,7 +49,7 @@ class HomeScreen extends HookConsumerWidget {
     }
 
     return NavigationScreen(
-      selectedIndex: 1,
+      selectedRoute: Routes.testerRequest,
       onItemTapped: (index) {
         debugPrint('index : $index');
       },
@@ -60,7 +60,7 @@ class HomeScreen extends HookConsumerWidget {
             children: <Widget>[
               ElevatedButton(
                 onPressed: () {
-                  if (userState.isLoading) return;
+                  if (userState.isLoading) return;  
                   if (selectedBrand != Brand.own) {
                     selectBrand(Brand.own);
                   }

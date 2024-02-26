@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tr_app/domain/entities/cart.dart';
 import 'package:tr_app/presentation/providers/cart_provider.dart';
 import 'package:tr_app/presentation/view_models/cart_view_model.dart';
 import 'package:tr_app/presentation/view_models/order_batch_view_model.dart';
+import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/presentation/widgets/cart_widgets/cart_detail_widget.dart';
 import 'package:tr_app/presentation/widgets/cart_widgets/cart_skeleton_loading_widget.dart';
 import 'package:tr_app/presentation/widgets/product_image_loader_widget.dart';
+import 'package:tr_app/utils/constants/enum_constants.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
 
 class CartScreen extends HookConsumerWidget {
@@ -14,14 +18,26 @@ class CartScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     debugPrint("CartScreen @ build");
-    final cartNotifier = ref.read(cartNotifierProvider.notifier);
+    // final cartNotifier = ref.read(cartNotifierProvider.notifier);
+
+    // useEffect(() {
+    //   Future.delayed(Duration.zero, () {
+    //     ref
+    //         .read(cartNotifierProvider.notifier)
+    //         .list(ref.read(userNotifierProvider).user!);
+    //   });
+    // }, const []);
 
     Future<void> addCartToOrder() async {
+      final user = ref.read(userNotifierProvider).user;
       final isOrdered =
-          await ref.read(cartNotifierProvider.notifier).addCartToOrder();
+          await ref.read(cartNotifierProvider.notifier).addCartToOrder(user!);
       if (isOrdered) {
         await ref.read(cartNotifierProvider.notifier).resetState();
-        await ref.read(orderBatchNotifierProvider.notifier).list(null);
+        final user = ref.read(userNotifierProvider).user;
+        await ref
+            .read(orderBatchNotifierProvider.notifier)
+            .list(user!, TrOrderBatchStatus.all);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -32,16 +48,11 @@ class CartScreen extends HookConsumerWidget {
       }
     }
 
-    // useEffect(() {
-    //   Future.delayed(const Duration(seconds: 0)).then((_) {
-    //     ref.read(cartNotifierProvider.notifier).list();
-    //   });
-    //   return () {};
-    // }, []);
-
     return RefreshIndicator(
       onRefresh: () async {
-        cartNotifier.list();
+        final user = ref.read(userNotifierProvider).user;
+        ref.read(cartNotifierProvider.notifier).list(user!);
+        // ref.read(refreshCartProvider.notifier).state = true;
       },
       child: ref.watch(cartFutureProvider).when(
             data: (data) => Column(
@@ -75,7 +86,7 @@ class CartScreen extends HookConsumerWidget {
                         );
                       }
 
-                      final cart = data[index];
+                      final Cart cart = data[index];
 
                       return Dismissible(
                         key: Key(cart.trCartId.toString()),
@@ -95,7 +106,10 @@ class CartScreen extends HookConsumerWidget {
                               .remove(cart.trCartId!);
                         },
                         child: InkWell(
-                          onTap: () => showCartDetail(context),
+                          onTap: () {
+                            // reset state
+                            showCartDetail(context, cart, index);
+                          },
                           child: ListTile(
                             title: Container(
                               padding: const EdgeInsets.all(4),
@@ -160,11 +174,17 @@ class CartScreen extends HookConsumerWidget {
                                       ),
                                     ],
                                   ),
-                                  dataRow('Reason : ', cart.reason,
+                                  dataRow('Reason : ', cart.reason?.name,
                                       'Select a reason.'),
                                   cart.requireJustify!
-                                      ? dataRow('Justification : ',
-                                          cart.justification, 'Plesae justify.')
+                                      ? dataRow(
+                                          'Justification : ',
+                                          (cart.justification != null &&
+                                                  cart.justification!.length >
+                                                      30)
+                                              ? '${cart.justification?.substring(0, 30)}...'
+                                              : cart.justification,
+                                          'Plesae justify.')
                                       : const SizedBox.shrink(),
                                   !cart.isAvailableStock!
                                       ? const Text(
@@ -206,7 +226,7 @@ class CartScreen extends HookConsumerWidget {
                     : const SizedBox.shrink(),
               ],
             ),
-            loading: () => CartSkeletonLoadingWidget(),
+            loading: () => const CartSkeletonLoadingWidget(),
             error: (error, stackTrace) => Center(
               child: Text(error.toString().replaceAll('Exception: ', '')),
             ),

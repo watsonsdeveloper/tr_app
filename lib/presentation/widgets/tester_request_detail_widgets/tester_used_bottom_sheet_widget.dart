@@ -52,19 +52,19 @@ void showTesterUsedModalBottomSheet(BuildContext context) {
           // final Reason reasonState = ref.watch(reasonStateProvider);
           final reasonState = useState(Reason.none);
           final errorState = useState<String>('');
-          final images = ref.watch(uploadedImagesProvider);
+          // final images = ref.watch(uploadedImagesProvider);
 
           void submit() {
-            if (formKey.currentState!.validate()) {}
-            final FormState? form = formKey.currentState;
-            if (reasonState.value == Reason.none) {
-              errorState.value = 'Please select item status.';
-            } else if (images.isEmpty) {
-              errorState.value = 'Please take a picture.';
-            } else {
-              errorState.value = '';
-              if (form!.validate()) {}
-            }
+            // if (formKey.currentState!.validate()) {}
+            // final FormState? form = formKey.currentState;
+            // if (reasonState.value == Reason.none) {
+            //   errorState.value = 'Please select item status.';
+            // } else if (images.isEmpty) {
+            //   errorState.value = 'Please take a picture.';
+            // } else {
+            //   errorState.value = '';
+            //   if (form!.validate()) {}
+            // }
           }
 
           return Theme(
@@ -93,7 +93,7 @@ void showTesterUsedModalBottomSheet(BuildContext context) {
                           icon: const Icon(Icons.close),
                         ),
                       ),
-                      const PreviewCameraImageWidget(),
+                      const PreviewCameraImageWidget(cartId: 0),
                       RadioListTile<Reason>(
                         title: Text(
                           'Depleted',

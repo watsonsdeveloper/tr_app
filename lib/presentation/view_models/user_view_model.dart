@@ -48,7 +48,7 @@ class UserNotifier extends StateNotifier<UserState> {
 
   void getUser() {
     try {
-      state = state.copyWith(isLoading: true);
+      // state = state.copyWith(isLoading: true);
       final user = _userUseCase.getUser();
       if (user != null) {
         state = state.copyWith(isLoading: false, user: user);

@@ -8,4 +8,6 @@ abstract class CartService implements Service<Cart> {
   Future<Cart> addToCart(
       String pluOrBarcode, String storeId, Brand brand, String createdBy);
   Future<bool> removeCart(String storeId, int trCartId);
+  Future<Cart> updateCartRequirement(String storeId, int trCartId,
+      String username, Reason reason, String? justification);
 }

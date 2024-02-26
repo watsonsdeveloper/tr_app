@@ -56,7 +56,7 @@ class OrderNotifier extends StateNotifier<OrderState> {
   Future<List<Order>> list(
       int orderBatchId, TrOrderStatus? status, String? pluOrBarcode) async {
     try {
-      if (_user == null || _user.storeId == null) {
+      if (_user == null) {
         state = state.copyWith(
             errorMessage: 'User or storeId is null', isLoading: false);
         return [];

@@ -3,15 +3,13 @@ import 'package:tr_app/domain/entities/order_batch.dart';
 import 'package:tr_app/domain/entities/user.dart';
 import 'package:tr_app/domain/use_cases/order_use_case.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
-import 'package:tr_app/presentation/view_models/cart_view_model.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 
 final orderBatchNotifierProvider =
     StateNotifierProvider<OrderBatchNotifier, OrderBatchState>(
   (ref) {
-    ref.watch(cartNotifierProvider).carts;
-    final user = ref.watch(userNotifierProvider).user;
+    final user = ref.read(userNotifierProvider).user;
     final orderUseCase = ref.read(orderUseCaseProvider);
     return OrderBatchNotifier(user, orderUseCase);
   },
@@ -57,29 +55,27 @@ class OrderBatchNotifier extends StateNotifier<OrderBatchState> {
   final User? _user;
   final OrderUseCase _orderUseCase;
 
-  OrderBatchNotifier(this._user, this._orderUseCase)
-      : super(OrderBatchState()) {
-    list(TrOrderBatchStatus.all);
-  }
+  OrderBatchNotifier(this._user, this._orderUseCase) : super(OrderBatchState());
 
-  Future<void> list(TrOrderBatchStatus? status) async {
+  Future<List<OrderBatch>?> list(User user, TrOrderBatchStatus? status) async {
     try {
-      if (_user == null) {
+      if (user == null) {
         state = state.copyWith(
             errorMessage: 'User or storeId is null', isLoading: false);
-        return;
+        return null;
       }
-      state = state.copyWith(isLoading: true);
       final orderBatchList = await _orderUseCase.getOrderBatchList(
-          _user.storeId!,
-          _user.selectedBrand,
-          state.orderBatchSearch.trOrderStatus ?? TrOrderStatus.all,
+          user.storeId,
+          user.selectedBrand,
+          state.orderBatchSearch.trOrderStatus,
           state.orderBatchSearch.pluOrBarcode);
       state = state.copyWith(orderBatchList: orderBatchList, isLoading: false);
+      return orderBatchList;
     } catch (e) {
       state = state.copyWith(
           errorMessage: e.toString().replaceAll('Exception: ', ''),
           isLoading: false);
+      return null;
     }
   }
 }

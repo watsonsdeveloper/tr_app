@@ -2,26 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/presentation/view_models/cart_view_model.dart';
+import 'package:tr_app/presentation/view_models/order_batch_view_model.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
 
 class NavigationScreen extends HookConsumerWidget {
   final Widget bodyContent;
-  final int selectedIndex;
+  final String selectedRoute;
   final Function(int) onItemTapped;
 
   const NavigationScreen({
     super.key,
     required this.bodyContent,
-    required this.selectedIndex,
+    required this.selectedRoute,
     required this.onItemTapped,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    debugPrint('NavigationScreen @ selectedIndex: $selectedIndex');
-    final user = ref.watch(userNotifierProvider).user;
+    debugPrint('NavigationScreen @ selectedRoute: $selectedRoute');
+    final user = ref.read(userNotifierProvider).user;
     if (user == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushNamedAndRemoveUntil(
@@ -74,29 +75,41 @@ class NavigationScreen extends HookConsumerWidget {
         automaticallyImplyLeading: false,
         leading: null,
         title: Text(
-          '${selectedBrand.value == Brand.own ? 'Own Brand' : 'A Brand'} - ( ${user?.storeName ?? ''} )',
+          '${selectedBrand.value == Brand.own ? 'Own Brand' : 'A Brand'} - ( M${user?.storeId ?? ''} )',
           softWrap: true,
         ),
         actions: [
           SizedBox(
             height: 24,
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 selectedBrand.value = selectedBrand.value == Brand.own
                     ? Brand.supplier
                     : Brand.own;
-                ref.read(userNotifierProvider.notifier).toggleBrand();
+                await ref.read(userNotifierProvider.notifier).toggleBrand();
+                final user = ref.read(userNotifierProvider).user;
+                if (selectedRoute == Routes.testerRequest) {
+                  ref.read(cartNotifierProvider.notifier).list(user!);
+                } else if (selectedRoute == Routes.orderBatch) {
+                  ref
+                      .read(orderBatchNotifierProvider.notifier)
+                      .list(user!, null);
+                }
               },
-              child: Text(
-                selectedBrand.value == Brand.own ? 'A' : 'W',
-                style: TextStyle(
-                  color: selectedBrand.value == Brand.own
-                      ? Colors.orange
-                      : Theme.of(context).primaryColor,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Comic Sans MS',
-                ),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  return Text(
+                    selectedBrand.value == Brand.own ? 'A' : 'W',
+                    style: TextStyle(
+                      color: selectedBrand.value == Brand.own
+                          ? Colors.orange
+                          : Theme.of(context).primaryColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Comic Sans MS',
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -113,7 +126,7 @@ class NavigationScreen extends HookConsumerWidget {
       body: bodyContent,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          if (selectedIndex == 0) {
+          if (selectedRoute == Routes.orderBatch) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushNamedAndRemoveUntil(
                 context,
@@ -134,7 +147,10 @@ class NavigationScreen extends HookConsumerWidget {
         backgroundColor: Theme.of(context).primaryColor,
         shape: const StadiumBorder(),
         elevation: 2.0,
-        child: Icon(selectedIndex == 0 ? Icons.barcode_reader : Icons.list_alt,
+        child: Icon(
+            selectedRoute == Routes.testerRequest
+                ? Icons.barcode_reader
+                : Icons.list_alt,
             color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

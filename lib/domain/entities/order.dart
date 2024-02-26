@@ -7,7 +7,7 @@ class Order {
   final String productName;
   final String brandName;
   final String? productImageUrl;
-  final String? reason;
+  final Reason? reason;
   final String? justification;
   final String supplierName;
   final String supplierCode;
@@ -43,7 +43,7 @@ class Order {
       productName: json['productName'],
       brandName: json['brandName'],
       productImageUrl: json['productImageUrl'],
-      reason: json['reason'],
+      reason: json['reason'] != null ? Reason.values[json['reason']] : null,
       justification: json['justification'],
       supplierName: json['supplierName'],
       supplierCode: json['supplierCode'],

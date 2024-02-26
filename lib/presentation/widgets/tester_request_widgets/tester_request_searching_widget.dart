@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/presentation/view_models/cart_view_model.dart';
+import 'package:tr_app/presentation/view_models/user_view_model.dart';
 
 enum SearchType { text, scan }
 
@@ -43,9 +44,11 @@ class RequestSearchWidget extends HookConsumerWidget {
     }, [requestController]);
 
     Future<void> addToCart() async {
-      await ref.read(cartNotifierProvider.notifier).clearErrorMessage();
+      ref.read(cartNotifierProvider.notifier);
       if (requestFormKey.currentState!.validate()) {
+        final user = ref.read(userNotifierProvider).user;
         var added = await ref.read(cartNotifierProvider.notifier).addToCart(
+              user!,
               requestController.text.trim(),
             );
 
@@ -159,7 +162,7 @@ class RequestSearchWidget extends HookConsumerWidget {
                     ? Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
-                          cartState.errorMessage!,
+                          cartState.errorMessage.toString(),
                           style: const TextStyle(color: Colors.red),
                         ),
                       )
@@ -206,8 +209,8 @@ class RequestSearchWidget extends HookConsumerWidget {
               ),
               child: Icon(
                 searchType.value == SearchType.scan
-                    ? Icons.barcode_reader
-                    : Icons.search_outlined,
+                    ? Icons.search_outlined
+                    : Icons.barcode_reader,
                 color: Colors.white,
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:tr_app/domain/entities/cart.dart';
+import 'package:tr_app/domain/entities/uploaded_image.dart';
 import 'package:tr_app/domain/services/cart_service.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 
@@ -40,4 +41,16 @@ class CartUseCase {
       throw Exception(e.toString());
     }
   }
+
+  Future<Cart> updateCartRequirement(String storeId, int trCartId,
+      String username, Reason reason, String? justification) async {
+    try {
+      return await _cartService.updateCartRequirement(
+          storeId, trCartId, username, reason, justification);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+
 }

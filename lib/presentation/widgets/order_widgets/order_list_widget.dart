@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/entities/order.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
+import 'package:tr_app/presentation/themes/constants_theme.dart';
 import 'package:tr_app/presentation/widgets/product_image_loader_widget.dart';
 
 class OrderListWidget extends HookConsumerWidget {
@@ -103,13 +104,23 @@ class OrderItemWidget extends StatelessWidget {
         OrderItemDataRow('Supplier Name', order.supplierName.toString()),
         // OrderItemDataRow('Created At', order.createdAt.toString()),
         order.reason != null
-            ? OrderItemDataRow('Reason', order.reason.toString())
+            ? OrderItemDataRow('Reason',
+                order.reason != null ? order.reason!.name.toUpperCase() : '')
             : const SizedBox(),
         order.justification != null
-            ? OrderItemDataRow('Justification', order.justification.toString())
+            ? OrderItemDataRow(
+                'Justification',
+                (order.justification != null &&
+                        order.justification!.length > 30)
+                    ? '${order.justification.toString().substring(0, 30)}...'
+                    : order.justification.toString())
             : const SizedBox(),
         OrderItemDataRow('Created By', order.createdBy.toString()),
-        OrderItemDataRow('Status', order.trOrderStatus.name.toUpperCase()),
+        OrderItemDataRow(
+          'Status',
+          order.trOrderStatus.name.toUpperCase(),
+          color: trOrderStatusColors[order.trOrderStatus],
+        ),
       ],
     );
   }
@@ -118,8 +129,9 @@ class OrderItemWidget extends StatelessWidget {
 class OrderItemDataRow extends StatelessWidget {
   final String title;
   final String value;
+  final Color? color;
 
-  const OrderItemDataRow(this.title, this.value, {super.key});
+  const OrderItemDataRow(this.title, this.value, {super.key, this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +152,7 @@ class OrderItemDataRow extends StatelessWidget {
             child: Text(
               value,
               softWrap: true,
+              style: TextStyle(color: color ?? Colors.black),
             ),
           ),
         ],

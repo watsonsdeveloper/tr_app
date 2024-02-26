@@ -23,8 +23,6 @@ class ProductImageNotifier extends StateNotifier<ProductImageState> {
       : super(ProductImageState(productImageMap: {}));
 
   Future<String> getProductImageUrl(String plu) async {
-    debugPrint('ProductImageNotifier @ getProductImageUrl: $plu');
-
     if (state.productImageMap[plu] != null &&
         state.productImageMap[plu]!.isNotEmpty) {
       return state.productImageMap[plu]!;

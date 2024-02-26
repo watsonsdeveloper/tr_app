@@ -1,15 +1,17 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/entities/cart.dart';
+import 'package:tr_app/domain/entities/uploaded_image.dart';
 import 'package:tr_app/domain/entities/user.dart';
 import 'package:tr_app/domain/use_cases/cart_use_case.dart';
 import 'package:tr_app/presentation/providers/cart_provider.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
+import 'package:tr_app/utils/constants/enum_constants.dart';
 
 final cartDetailNotifierProvider =
     StateNotifierProvider<CartDetailNotifier, CartDetailState>(
   (ref) {
     final user = ref.watch(userNotifierProvider).user;
-    final cartUseCase = ref.watch(cartUseCaseProvider);
+    final cartUseCase = ref.read(cartUseCaseProvider);
     return CartDetailNotifier(user, cartUseCase);
   },
 );
@@ -62,7 +64,7 @@ class CartDetailNotifier extends StateNotifier<CartDetailState> {
 
   Future<Cart?> getCartDetail(int cartId) async {
     try {
-      state = state.copyWith(isLoading: true);
+      // state = state.copyWith(isLoading: true);
       final cart = await _cartUseCase.getCart(_user!.storeId!, cartId);
       state = state.copyWith(cart: cart);
       return cart;
@@ -70,6 +72,21 @@ class CartDetailNotifier extends StateNotifier<CartDetailState> {
       state = state.copyWith(
           errorMessage: e.toString().replaceAll('Exception: ', ''));
       return null;
+    }
+  }
+
+  Future<Cart?> updateCartRequirement(
+      int cartId, Reason reason, String? justification) async {
+    try {
+      final cart = await _cartUseCase.updateCartRequirement(
+          _user!.storeId, cartId, _user.username!, reason, justification);
+      state = state.copyWith(cart: cart, isLoading: false);
+      return cart;
+    } catch (e) {
+      state = state.copyWith(
+          errorMessage: e.toString().replaceAll('Exception: ', ''),
+          isLoading: false);
+      return Cart(errorMessage: e.toString().replaceAll('Exception: ', ''));
     }
   }
 }

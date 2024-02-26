@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/entities/order_batch.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
+import 'package:tr_app/presentation/themes/constants_theme.dart';
 import 'package:tr_app/presentation/view_models/order_batch_view_model.dart';
+import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/presentation/widgets/order_widgets/order_batch_expanded_list_widget.dart';
-import 'package:tr_app/utils/constants/enum_constants.dart';
+import 'package:tr_app/presentation/widgets/order_widgets/order_batch_skeleton_loading_widget.dart';
 
 class OrderBatchListWidget extends HookConsumerWidget {
   const OrderBatchListWidget({super.key});
@@ -12,39 +14,17 @@ class OrderBatchListWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     debugPrint('OrderBatchListWidget @ build');
-    final orderBatchNotifier = ref.read(orderBatchNotifierProvider.notifier);
-
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(12),
+      height: 500,
       child: RefreshIndicator(
         onRefresh: () async {
-          orderBatchNotifier.list(TrOrderBatchStatus.all);
+          final user = ref.read(userNotifierProvider).user;
+          ref.read(orderBatchNotifierProvider.notifier).list(user!, null);
         },
         child: ref.watch(orderBatchFutureProvider).when(
-              data: (data) => data.isEmpty
-                  ? Container(
-                      padding: const EdgeInsets.all(12),
-                      child: const Center(child: Text('No Result Found')))
-                  : OrderBatchListView(orderBatchList: data),
-              loading: () => const Padding(
-                padding: EdgeInsets.all(12),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
+              data: (data) => OrderBatchListView(orderBatchList: data),
+              loading: () => const OrderBatchSkeletonLoadingWidget(),
               error: (error, stackTrace) => Center(
                 child: Text(error.toString().replaceAll('Exception: ', '')),
               ),
@@ -61,25 +41,47 @@ class OrderBatchListView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListView.separated(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
+    return ListView.builder(
+      // physics: const NeverScrollableScrollPhysics(),
+      // shrinkWrap: true,
       scrollDirection: Axis.vertical,
-      itemCount: orderBatchList.length,
+      itemCount: orderBatchList.isNotEmpty ? orderBatchList.length : 1,
       itemBuilder: (context, index) {
-        return
-            // InkWell(
-            //   onTap: () async {
-            //     await ref.read(orderNotifierProvider.notifier).list(
-            //         orderBatchList[index].trOrderBatchId,
-            //         TrOrderStatus.all,
-            //         null);
-            //     WidgetsBinding.instance.addPostFrameCallback((_) {
-            //       Navigator.pushNamed(context, Routes.order);
-            //     });
-            //   },
-            //   child:
-            Card(
+        if (orderBatchList.isEmpty) {
+          return SizedBox(
+            height: 450,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(Icons.list, size: 48, color: Colors.grey[300]),
+                  Text(
+                    'No Orders',
+                    style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Comic Sans MS',
+                        color: Theme.of(context).primaryColor),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // InkWell(
+        //   onTap: () async {
+        //     await ref.read(orderNotifierProvider.notifier).list(
+        //         orderBatchList[index].trOrderBatchId,
+        //         TrOrderStatus.all,
+        //         null);
+        //     WidgetsBinding.instance.addPostFrameCallback((_) {
+        //       Navigator.pushNamed(context, Routes.order);
+        //     });
+        //   },
+        //   child:
+        return Card(
           elevation: 2,
           margin: const EdgeInsets.symmetric(
             vertical: 12,
@@ -90,16 +92,16 @@ class OrderBatchListView extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _dataRow(
-                    'Order:', orderBatchList[index].trOrderBatchId.toString()),
-                _dataRow(
-                    'Created At:', orderBatchList[index].createdAt.toString()),
+                _dataRow('Request ID:',
+                    orderBatchList[index].trOrderBatchId.toString(), null),
+                _dataRow('Created By:', orderBatchList[index].createdBy, null),
+                _dataRow('Created At:',
+                    orderBatchList[index].createdAt.toString(), null),
                 _dataRow(
                     'Status:',
-                    orderBatchList[index]
-                        .trOrderBatchStatus
-                        .name
-                        .toUpperCase()),
+                    orderBatchList[index].trOrderBatchStatus.name.toUpperCase(),
+                    trOrderBatchStatusColors[
+                        orderBatchList[index].trOrderBatchStatus]),
                 OrderBatchExpandedListWidget(
                     orderBatchId: orderBatchList[index].trOrderBatchId),
               ],
@@ -108,19 +110,10 @@ class OrderBatchListView extends HookConsumerWidget {
         );
         // );
       },
-      separatorBuilder: (context, index) {
-        if (index != 2) {
-          return Divider(
-            color: Colors.grey.shade200,
-          );
-        } else {
-          return const SizedBox.shrink();
-        }
-      },
     );
   }
 
-  _dataRow(String title, String value) {
+  _dataRow(String title, String value, Color? color) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -136,6 +129,7 @@ class OrderBatchListView extends HookConsumerWidget {
             child: Text(
               value,
               softWrap: true,
+              style: TextStyle(color: color ?? Colors.black),
             ),
           ),
         ],
