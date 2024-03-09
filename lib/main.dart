@@ -11,12 +11,10 @@ import 'package:tr_app/presentation/screens/home_screen.dart';
 import 'package:tr_app/presentation/screens/order_batch_screen.dart';
 import 'package:tr_app/presentation/screens/order_screen.dart';
 import 'package:tr_app/presentation/screens/request_item_detail_screen.dart';
-import 'package:tr_app/presentation/screens/test_screen.dart';
 import 'package:tr_app/presentation/screens/tester_request_listing_screen.dart';
 import 'package:tr_app/presentation/screens/scan_ip_screen.dart';
 import 'package:tr_app/presentation/screens/tester_request_screen.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
-import 'package:tr_app/presentation/widgets/tester_request_widgets/tester_request_searching_widget.dart';
 import 'package:tr_app/utils/constants/hive_constants.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
 
@@ -93,12 +91,12 @@ class TrApp extends HookConsumerWidget {
         ),
         useMaterial3: true,
       ),
-      // home: storeIP == null
-      //     ? ScanIPScreen()
-      //     : user?.token != null
-      //         ? const TesterRequestScreen()
-      //         : LoginScreen(),
-      home: TesterRequestScreen(),
+      home: storeIP == null
+          ? ScanIPScreen()
+          : user?.token != null
+              ? const TesterRequestScreen()
+              : LoginScreen(),
+      // home: TesterRequestScreen(),
     );
   }
 }

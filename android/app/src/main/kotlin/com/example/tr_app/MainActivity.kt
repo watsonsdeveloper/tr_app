@@ -1,4 +1,4 @@
-package com.example.tr_app
+package com.watsons.tr_app
 
 import io.flutter.embedding.android.FlutterActivity
 
