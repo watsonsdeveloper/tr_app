@@ -35,7 +35,7 @@ class TrApp extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.read(userNotifierProvider.select((state) => state.user));
-    final storeIP = ref.read(globalSNP.select((state) => state.storeIP));
+    final storeIP = ref.watch(globalSNP.select((state) => state.storeIP));
 
     debugPrint('main.dart @ storeIP: $storeIP');
     debugPrint('main.dart @ user: ${user?.toJson()}');

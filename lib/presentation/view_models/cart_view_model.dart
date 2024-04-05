@@ -251,7 +251,8 @@ class CartNotifier extends StateNotifier<CartState> {
       // state = state.copyWith(isLoading: true);
       final cartList =
           await _cartUseCase.getCarts(user.storeId, user.selectedBrand);
-      state = state.copyWith(carts: cartList, isLoading: false);
+      state =
+          state.copyWith(carts: cartList, isLoading: false, errorMessage: "");
       return cartList;
     } catch (e) {
       state = state.copyWith(
@@ -311,6 +312,7 @@ class CartNotifier extends StateNotifier<CartState> {
 
   Future<bool> addCartToOrder(User user) async {
     try {
+      // state = state.copyWith(isLoading: true, errorMessage: '');
       final cartList = await _orderUseCase.addCartToOrder(
           state.carts, user!.storeId, user.selectedBrand, user.username!);
       state = state.copyWith(carts: cartList, isLoading: false);

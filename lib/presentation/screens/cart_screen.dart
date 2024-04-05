@@ -29,6 +29,9 @@ class CartScreen extends HookConsumerWidget {
     // }, const []);
 
     Future<void> addCartToOrder() async {
+      final cartState = ref.read(cartNotifierProvider);
+      if (cartState.isLoading) return;
+
       final user = ref.read(userNotifierProvider).user;
       final isOrdered =
           await ref.read(cartNotifierProvider.notifier).addCartToOrder(user!);
@@ -218,10 +221,15 @@ class CartScreen extends HookConsumerWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                         ),
-                        child: const Text(
-                          'Checkout',
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: ref.watch(cartNotifierProvider).isLoading
+                            ? const CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              )
+                            : const Text(
+                                'Checkout',
+                                style: TextStyle(color: Colors.white),
+                              ),
                       )
                     : const SizedBox.shrink(),
               ],
