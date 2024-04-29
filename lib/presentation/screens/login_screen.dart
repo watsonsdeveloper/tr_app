@@ -29,7 +29,7 @@ class LoginScreen extends HookConsumerWidget {
       // WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.pushNamedAndRemoveUntil(
         context,
-        Routes.testerRequest,
+        Routes.cartScreen,
         (Route<dynamic> route) => false,
       );
       // });

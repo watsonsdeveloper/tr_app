@@ -5,7 +5,9 @@ import 'package:tr_app/domain/entities/order.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
 import 'package:tr_app/presentation/view_models/order_batch_view_model.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
+import 'package:tr_app/presentation/widgets/order_widgets/order_batch_expanded_list_skeleton_loading_widget.dart';
 import 'package:tr_app/presentation/widgets/order_widgets/order_list_widget.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 class OrderBatchExpandedListWidget extends HookConsumerWidget {
   final int orderBatchId;
@@ -17,6 +19,7 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = useState<bool>(false);
     final user = ref.read(userNotifierProvider).user;
     final orderBatchSearch =
         ref.watch(orderBatchNotifierProvider).orderBatchSearch;
@@ -50,6 +53,10 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
           return;
         }
 
+        if (isLoading.value) return;
+        isLoading.value = true;
+        errorMessage.value = '';
+
         orderList.value = await ref.read(orderUseCaseProvider).getOrderList(
             orderBatchId,
             user.storeId,
@@ -57,7 +64,11 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
             orderBatchSearch.trOrderStatus,
             orderBatchSearch.pluOrBarcode);
       } catch (e) {
-        throw Exception(e.toString());
+        errorMessage.value = ErrorHandler.handleErrorMessage(e);
+      } finally {
+        if (context.mounted) {
+          isLoading.value = false;
+        }
       }
     }
 
@@ -76,37 +87,44 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
             heightFactor: isExpanded.value ? 1.0 : 0.0,
             child: InkWell(
               onTap: null,
-              child: errorMessage.value.isNotEmpty
-                  ? Text(
-                      errorMessage.value,
-                      style: const TextStyle(color: Colors.red),
+              child: isLoading.value
+                  ? Container(
+                      padding: const EdgeInsets.all(4),
+                      // height: 52,
+                      child:
+                          const OrderBatchExapndedListSkeletonLoadingWidget(),
                     )
-                  : orderList.value.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Center(child: Text('No Result Found')),
+                  : errorMessage.value.isNotEmpty
+                      ? Text(
+                          errorMessage.value,
+                          style: const TextStyle(color: Colors.red),
                         )
-                      // : OrderListView(list: orderList.value),
+                      : orderList.value.isEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: Center(child: Text('No Result Found')),
+                            )
+                          // : OrderListView(list: orderList.value),
 
-                      : SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: orderList.value
-                                .map(
-                                  (orderItem) => Card(
-                                    elevation: 2,
-                                    surfaceTintColor:
-                                        Colors.white.withOpacity(0.3),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      child: OrderItemWidget(orderItem),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: orderList.value
+                                    .map(
+                                      (orderItem) => Card(
+                                        elevation: 2,
+                                        surfaceTintColor:
+                                            Colors.white.withOpacity(0.3),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          child: OrderItemWidget(orderItem),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
             ),
           ),
         ),

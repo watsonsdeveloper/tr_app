@@ -4,6 +4,7 @@ import 'package:tr_app/domain/entities/user.dart';
 import 'package:tr_app/domain/use_cases/upload_image_use_case.dart';
 import 'package:tr_app/presentation/providers/upload_image_provider.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 final uploadImageNotifierProvider =
     StateNotifierProvider<UploadImageNotifer, UploadImageState>((ref) {
@@ -58,8 +59,7 @@ class UploadImageNotifer extends StateNotifier<UploadImageState> {
       return uploadedImagesIds;
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
       return [];
     }
   }
@@ -74,8 +74,7 @@ class UploadImageNotifer extends StateNotifier<UploadImageState> {
       return isSuccess;
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
       return false;
     }
   }
@@ -89,8 +88,7 @@ class UploadImageNotifer extends StateNotifier<UploadImageState> {
       return uploadedImage;
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
       return null;
     }
   }

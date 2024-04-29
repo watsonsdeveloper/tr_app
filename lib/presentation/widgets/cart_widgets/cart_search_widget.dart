@@ -7,92 +7,74 @@ import 'package:tr_app/presentation/view_models/user_view_model.dart';
 
 enum SearchType { text, scan }
 
-class RequestSearchWidget extends HookConsumerWidget {
+class CartSearchWidget extends HookConsumerWidget {
   final requestFormKey = GlobalKey<FormState>();
 
-  RequestSearchWidget({super.key});
+  CartSearchWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final requestController = useTextEditingController();
+    final searchController = useTextEditingController();
     final searchFocusNode = useFocusNode();
 
     final searchType = useState(SearchType.scan);
+    final isSearching = useState<bool>(false);
 
-    final cartState = ref.watch(cartNotifierProvider);
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 500),
+    );
+    animationController.repeat();
 
-    useEffect(() {
-      void listener() {
-        // if (requestController.text.isEmpty) {
-        //   searchIcon.value = Icons.barcode_reader;
-        // } else {
-        //   searchIcon.value = Icons.search_outlined;
-        // }
-        // searchFocusNode.requestFocus();
-        // if (pluController.text.isEmpty) {
-        //   formKey.currentState!.validate();
-        // }
-        // debugPrint('pluController : ${pluController.text}');
-      }
+    // useEffect(() {
+    //   void listener() {
+    //     // if (searchController.text.isEmpty) {
+    //     //   searchIcon.value = Icons.barcode_reader;
+    //     // } else {
+    //     //   searchIcon.value = Icons.search_outlined;
+    //     // }
+    //     // searchFocusNode.requestFocus();
+    //     // if (pluController.text.isEmpty) {
+    //     //   formKey.currentState!.validate();
+    //     // }
+    //     // debugPrint('pluController : ${pluController.text}');
+    //   }
 
-      requestController.addListener(listener);
-      return () {
-        // dispose listerner and controller when widget dispose
-        // requestController.removeListener(listener);
-        // requestController.dispose();
-      };
-    }, [requestController]);
+    //   searchController.addListener(listener);
+    //   return () {
+    //     // dispose listerner and controller when widget dispose
+    //     // searchController.removeListener(listener);
+    //     // searchController.dispose();
+    //   };
+    // }, [searchController]);
 
     Future<void> addToCart() async {
-      ref.read(cartNotifierProvider.notifier);
+      if (isSearching.value) return;
+      isSearching.value = true;
+
       if (requestFormKey.currentState!.validate()) {
         final user = ref.read(userNotifierProvider).user;
-        var added = await ref.read(cartNotifierProvider.notifier).addToCart(
+        var addedCart = await ref.read(cartNotifierProvider.notifier).addToCart(
               user!,
-              requestController.text.trim(),
+              searchController.text.trim(),
             );
 
-        if (added) {
+        if (addedCart != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                    "${requestController.text.trim()} Added successfully!"),
+                content:
+                    Text("${searchController.text.trim()} Added successfully!"),
                 backgroundColor: Colors.green,
               ),
             );
           });
-          requestController.clear();
+          searchController.clear();
         }
-        // final ProductState productState = await ref
-        //     .read(productSNProvider.notifier)
-        //     .getProduct(requestController.text.trim());
-        // if (productState.product != null) {
-        //   WidgetsBinding.instance.addPostFrameCallback((_) {
-        //     Navigator.pushNamed(context, Routes.productDetail);
-        //   });
-        // } else {
-        //   WidgetsBinding.instance.addPostFrameCallback((_) {
-        //     ScaffoldMessenger.of(context).showSnackBar(
-        //       SnackBar(
-        //         content: Text(productState.errorMessage!),
-        //         backgroundColor: Colors.red,
-        //       ),
-        //     );
-        //   });
-        //   return;
-        // }
       }
+      isSearching.value = false;
     }
 
     return Container(
-      // decoration: BoxDecoration(
-      //   border: Border.all(
-      //     color: Colors.grey,
-      //     width: 1.0,
-      //   ),
-      //   borderRadius: BorderRadius.circular(12),
-      // ),
       margin: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -106,7 +88,7 @@ class RequestSearchWidget extends HookConsumerWidget {
                   child: TextFormField(
                     focusNode: searchFocusNode,
                     autofocus: true,
-                    controller: requestController,
+                    controller: searchController,
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.only(
@@ -121,21 +103,36 @@ class RequestSearchWidget extends HookConsumerWidget {
                       hintText: searchType.value == SearchType.text
                           ? 'Enter PLU or Barcode'
                           : 'Scan Barcode',
-                      suffixIcon: IconButton(
-                        icon: Icon(searchType.value == SearchType.text
-                            ? Icons.add_shopping_cart
-                            : Icons.delete_forever),
-                        onPressed: () {
-                          if (searchType.value == SearchType.text) {
-                            addToCart();
-                          } else {
-                            requestController.clear();
-                            ref
-                                .read(cartNotifierProvider.notifier)
-                                .clearErrorMessage();
-                          }
-                        },
-                      ),
+                      suffixIcon: isSearching.value
+                          ? const SizedBox(
+                              width: 0,
+                              height: 0,
+                              child: CircularProgressIndicator(),
+                            )
+                          : IconButton(
+                              icon: Icon(searchType.value == SearchType.text
+                                  ? Icons.add_shopping_cart
+                                  : Icons.delete_forever),
+                              onPressed: () async {
+                                if (searchType.value == SearchType.text) {
+                                  // final cartState = ref.read(cartNotifierProvider);
+                                  // debugPrint('addToCart.. ${cartState.isSearching}');
+                                  // if (cartState.isSearching) return;
+                                  // ref
+                                  //     .read(cartNotifierProvider)
+                                  //     .copyWith(isSearching: true, errorMessage: "");
+                                  await addToCart();
+                                  // ref
+                                  //     .read(cartNotifierProvider)
+                                  //     .copyWith(isSearching: false);
+                                } else {
+                                  searchController.clear();
+                                  ref
+                                      .read(cartNotifierProvider.notifier)
+                                      .clearErrorMessage();
+                                }
+                              },
+                            ),
                     ),
                     inputFormatters: [
                       FilteringTextInputFormatter.digitsOnly,
@@ -147,26 +144,37 @@ class RequestSearchWidget extends HookConsumerWidget {
                       if (value.length < 5) {
                         return;
                       }
-                      if (!cartState.isLoading) {
-                        searchType.value == SearchType.scan
-                            ? addToCart()
-                            : null;
-                      }
+                      searchType.value == SearchType.scan ? addToCart() : null;
                     },
                     // onFieldSubmitted: (_) {
                     //   searchType.value == SearchType.scan ? search() : null;
                     // },
                   ),
                 ),
-                cartState.errorMessage != null
+                // Consumer(
+                //   builder: (context, watch, child) {
+                //     final cartState = watch(cartNotifierProvider);
+                //     return Text(
+                //       '${cartState.itemCount}',
+                //       style: Theme.of(context).textTheme.headline4,
+                //     );
+                //   },
+                // ref.watch(cartNotifierProvider).isLoading
+                //     ? CircularProgressIndicator()
+                //     : const SizedBox.shrink(),
+                ref.watch(cartNotifierProvider).errorMessage != null
                     ? Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
-                          cartState.errorMessage.toString(),
+                          ref
+                              .watch(cartNotifierProvider)
+                              .errorMessage
+                              .toString(),
                           style: const TextStyle(color: Colors.red),
                         ),
                       )
                     : const SizedBox.shrink(),
+                // ),
               ],
             ),
           ),
@@ -180,7 +188,7 @@ class RequestSearchWidget extends HookConsumerWidget {
                 } else if (searchType.value == SearchType.scan) {
                   searchType.value = SearchType.text;
                 }
-                requestController.clear();
+                searchController.clear();
                 searchFocusNode.requestFocus();
               },
               style: ButtonStyle(
@@ -224,7 +232,7 @@ class RequestSearchWidget extends HookConsumerWidget {
           //       width: 120,
           //       child: ElevatedButton(
           //         onPressed: () {
-          //           requestController.clear();
+          //           searchController.clear();
           //           searchType.value = SearchType.text;
           //           searchFocusNode.requestFocus();
           //         },
@@ -253,7 +261,7 @@ class RequestSearchWidget extends HookConsumerWidget {
           //       width: 120,
           //       child: ElevatedButton(
           //         onPressed: () {
-          //           requestController.clear();
+          //           searchController.clear();
           //           searchType.value = SearchType.scan;
           //           searchFocusNode.requestFocus();
           //         },

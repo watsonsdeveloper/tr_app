@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/data/models/global_model.dart';
@@ -11,12 +10,12 @@ import 'package:tr_app/presentation/screens/home_screen.dart';
 import 'package:tr_app/presentation/screens/order_batch_screen.dart';
 import 'package:tr_app/presentation/screens/order_screen.dart';
 import 'package:tr_app/presentation/screens/request_item_detail_screen.dart';
-import 'package:tr_app/presentation/screens/tester_request_listing_screen.dart';
 import 'package:tr_app/presentation/screens/scan_ip_screen.dart';
-import 'package:tr_app/presentation/screens/tester_request_screen.dart';
+import 'package:tr_app/presentation/screens/cart_screen.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/hive_constants.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
+
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -47,9 +46,8 @@ class TrApp extends HookConsumerWidget {
         Routes.login: (context) => LoginScreen(),
         Routes.home: (context) => const HomeScreen(),
         Routes.productDetail: (context) => const RequestItemDetailPage(),
-        Routes.testerRequestListing: (context) =>
-            const TesterRequestListingScreen(),
-        Routes.testerRequest: (context) => const TesterRequestScreen(),
+        Routes.testerRequestListing: (context) => const CartScreen(),
+        Routes.cartScreen: (context) => const CartScreen(),
         Routes.orderBatch: (context) => const OrderBatchScreen(),
         Routes.order: (context) => const OrderScreen(),
       },
@@ -94,7 +92,7 @@ class TrApp extends HookConsumerWidget {
       home: storeIP == null
           ? ScanIPScreen()
           : user?.token != null
-              ? const TesterRequestScreen()
+              ? const CartScreen()
               : LoginScreen(),
       // home: TesterRequestScreen(),
     );

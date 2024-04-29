@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/use_cases/user_use_case.dart';
 import 'package:tr_app/presentation/providers/user_provider.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 final loginStateNotifierProvider =
     StateNotifierProvider<LoginNotifier, LoginState>((ref) {
@@ -50,7 +51,7 @@ class LoginNotifier extends StateNotifier<LoginState> {
     } catch (e) {
       state = state.copyWith(
           isLoading: false,
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
+          errorMessage: ErrorHandler.handleErrorMessage(e),
           isLogin: false);
     }
     return isLogin;

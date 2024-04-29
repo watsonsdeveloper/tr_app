@@ -5,6 +5,7 @@ import 'package:tr_app/domain/use_cases/order_use_case.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 final orderNotifierProvider = StateNotifierProvider<OrderNotifier, OrderState>(
   (ref) {
@@ -72,8 +73,7 @@ class OrderNotifier extends StateNotifier<OrderState> {
       return orderList;
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
       return [];
     }
   }

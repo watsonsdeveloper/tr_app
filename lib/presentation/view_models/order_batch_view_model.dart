@@ -5,6 +5,7 @@ import 'package:tr_app/domain/use_cases/order_use_case.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 final orderBatchNotifierProvider =
     StateNotifierProvider<OrderBatchNotifier, OrderBatchState>(
@@ -55,7 +56,10 @@ class OrderBatchNotifier extends StateNotifier<OrderBatchState> {
   final User? _user;
   final OrderUseCase _orderUseCase;
 
-  OrderBatchNotifier(this._user, this._orderUseCase) : super(OrderBatchState());
+  OrderBatchNotifier(this._user, this._orderUseCase)
+      : super(OrderBatchState()) {
+    list(_user!, TrOrderBatchStatus.all);
+  }
 
   Future<List<OrderBatch>?> list(User user, TrOrderBatchStatus? status) async {
     try {
@@ -64,17 +68,21 @@ class OrderBatchNotifier extends StateNotifier<OrderBatchState> {
             errorMessage: 'User or storeId is null', isLoading: false);
         return null;
       }
+
+      if (state.isLoading) return null;
+      state.copyWith(isLoading: true, errorMessage: '');
+
       final orderBatchList = await _orderUseCase.getOrderBatchList(
           user.storeId,
           user.selectedBrand,
           state.orderBatchSearch.trOrderStatus,
           state.orderBatchSearch.pluOrBarcode);
-      state = state.copyWith(orderBatchList: orderBatchList, isLoading: false);
+      state = state.copyWith(
+          orderBatchList: orderBatchList, isLoading: false, errorMessage: '');
       return orderBatchList;
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
       return null;
     }
   }

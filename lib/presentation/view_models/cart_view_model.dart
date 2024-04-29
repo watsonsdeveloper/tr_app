@@ -7,6 +7,7 @@ import 'package:tr_app/domain/use_cases/order_use_case.dart';
 import 'package:tr_app/presentation/providers/cart_provider.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 // final cartNotifierProvider =
 //     StateNotifierProvider<CartNotifier, CartState>(
@@ -95,7 +96,7 @@ import 'package:tr_app/presentation/view_models/user_view_model.dart';
 //       return cartList;
 //     } catch (e) {
 //       state = AsyncValue.error(
-//           e.toString().replaceAll('Exception: ', ''), StackTrace.current);
+//           ErrorHandler.handleErrorMessage(e), StackTrace.current);
 //       return null;
 //     }
 //   }
@@ -117,7 +118,7 @@ import 'package:tr_app/presentation/view_models/user_view_model.dart';
 //     //   return true;
 //     // } catch (e) {
 //     //   state = state.copyWith(
-//     //       errorMessage: e.toString().replaceAll('Exception: ', ''),
+//     //       errorMessage: ErrorHandler.handleErrorMessage(e),
 //     //       isLoading: false);
 //     //   return false;
 //     // }
@@ -143,7 +144,7 @@ import 'package:tr_app/presentation/view_models/user_view_model.dart';
 //     //   state = state.copyWith(isLoading: false);
 //     // } catch (e) {
 //     //   state = state.copyWith(
-//     //       errorMessage: e.toString().replaceAll('Exception: ', ''),
+//     //       errorMessage: ErrorHandler.handleErrorMessage(e),
 //     //       isLoading: false);
 //     // }
 //     // return false;
@@ -159,7 +160,7 @@ import 'package:tr_app/presentation/view_models/user_view_model.dart';
 //     //       .any((c) => c.errorMessage != null && c.errorMessage!.isNotEmpty);
 //     // } catch (e) {
 //     //   state = state.copyWith(
-//     //       errorMessage: e.toString().replaceAll('Exception: ', ''),
+//     //       errorMessage: ErrorHandler.handleErrorMessage(e),
 //     //       isLoading: false);
 //     //   return false;
 //     // }
@@ -180,22 +181,26 @@ class CartState {
   final List<Cart> carts;
   final String? errorMessage;
   final bool isLoading;
+  final bool refresh;
 
   CartState({
     this.carts = const [],
     this.errorMessage,
     this.isLoading = false,
+    this.refresh = false,
   });
 
   CartState copyWith({
     List<Cart>? carts,
     String? errorMessage,
     bool? isLoading,
+    bool? refresh,
   }) {
     return CartState(
       carts: carts ?? this.carts,
       errorMessage: errorMessage ?? this.errorMessage,
       isLoading: isLoading ?? this.isLoading,
+      refresh: refresh ?? this.refresh,
     );
   }
 
@@ -211,7 +216,7 @@ class CartState {
     return CartState(
       carts: [],
       errorMessage: null,
-      isLoading: isLoading,
+      isLoading: false,
     );
   }
 }
@@ -223,6 +228,7 @@ class CartNotifier extends StateNotifier<CartState> {
 
   CartNotifier(this._user, this._cartUseCase, this._orderUseCase)
       : super(CartState()) {
+    debugPrint('initialize CartNotifier..');
     list(_user!);
   }
 
@@ -232,6 +238,20 @@ class CartNotifier extends StateNotifier<CartState> {
 
   resetState() {
     state = state.resetState();
+  }
+
+  copyWith({
+    List<Cart>? carts,
+    String? errorMessage,
+    bool? isLoading,
+    bool? refresh,
+  }) {
+    state = state.copyWith(
+      carts: carts,
+      errorMessage: errorMessage,
+      isLoading: isLoading,
+      refresh: refresh,
+    );
   }
 
   updateState(int index, Cart cart) {
@@ -247,41 +267,45 @@ class CartNotifier extends StateNotifier<CartState> {
             errorMessage: 'User or storeId is null', isLoading: false);
         return null;
       }
-      debugPrint('CartNotifier @ list ${user.selectedBrand}');
-      // state = state.copyWith(isLoading: true);
+
+      if (state.isLoading) return null;
+      state.copyWith(isLoading: true);
+
       final cartList =
           await _cartUseCase.getCarts(user.storeId, user.selectedBrand);
       state =
-          state.copyWith(carts: cartList, isLoading: false, errorMessage: "");
+          state.copyWith(carts: cartList, isLoading: false, errorMessage: '');
+
       return cartList;
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
+          carts: [],
+          errorMessage: ErrorHandler.handleErrorMessage(e),
           isLoading: false);
-      return null;
     }
   }
 
-  Future<bool> addToCart(User user, String pluOrBarcode) async {
+  Future<Cart?> addToCart(User user, String pluOrBarcode) async {
     try {
       if (user == null || user.storeId == null || user.username == null) {
         state = state.copyWith(
             errorMessage: 'User or storeId is null', isLoading: false);
-        return false;
+        return null;
       }
-      // state = state.copyWith(isLoading: true);
+      if (state.isLoading) return null;
+      state = state.copyWith(isLoading: true, errorMessage: '');
+
       final addedCart = await _cartUseCase.addToCart(
           pluOrBarcode, user.storeId!, user.selectedBrand, user.username!);
       state = state.copyWith(
           carts: [addedCart, ...state.carts],
           isLoading: false,
-          errorMessage: null);
-      return true;
+          errorMessage: '');
+      return addedCart;
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
-      return false;
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
+      return null;
     }
   }
 
@@ -292,37 +316,44 @@ class CartNotifier extends StateNotifier<CartState> {
             errorMessage: 'User or storeId is null', isLoading: false);
         return false;
       }
-      // state = state.copyWith(isLoading: true);
+
+      if (state.isLoading) return false;
+      // state = state.copyWith(isLoading: true, errorMessage: '');
+
       final isRemoved = await _cartUseCase.removeCart(_user.storeId!, trCartId);
       if (isRemoved) {
         state = state.copyWith(
-            carts: state.carts
-                .where((cart) => cart.trCartId != trCartId)
-                .toList());
+            carts:
+                state.carts.where((cart) => cart.trCartId != trCartId).toList(),
+            isLoading: false,
+            errorMessage: '');
         return true;
       }
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(
+          carts: [...state.carts], isLoading: false, errorMessage: '');
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
     }
     return false;
   }
 
-  Future<bool> addCartToOrder(User user) async {
+  Future<bool?> addCartToOrder(User user) async {
     try {
-      // state = state.copyWith(isLoading: true, errorMessage: '');
+      if (state.isLoading) return null;
+      state = state.copyWith(isLoading: true, errorMessage: '');
+
       final cartList = await _orderUseCase.addCartToOrder(
           state.carts, user!.storeId, user.selectedBrand, user.username!);
-      state = state.copyWith(carts: cartList, isLoading: false);
+      state =
+          state.copyWith(carts: cartList, isLoading: false, errorMessage: '');
+
       return !cartList
           .any((c) => c.errorMessage != null && c.errorMessage!.isNotEmpty);
     } catch (e) {
       state = state.copyWith(
-          errorMessage: e.toString().replaceAll('Exception: ', ''),
-          isLoading: false);
-      return false;
+          errorMessage: ErrorHandler.handleErrorMessage(e), isLoading: false);
+      return null;
     }
   }
 }

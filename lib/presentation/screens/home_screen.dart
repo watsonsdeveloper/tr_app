@@ -49,7 +49,7 @@ class HomeScreen extends HookConsumerWidget {
     }
 
     return NavigationScreen(
-      selectedRoute: Routes.testerRequest,
+      selectedRoute: Routes.cartScreen,
       onItemTapped: (index) {
         debugPrint('index : $index');
       },

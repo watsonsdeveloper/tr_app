@@ -1,5 +1,4 @@
 import 'package:tr_app/domain/entities/cart.dart';
-import 'package:tr_app/domain/entities/uploaded_image.dart';
 import 'package:tr_app/domain/services/cart_service.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 
@@ -38,7 +37,7 @@ class CartUseCase {
     try {
       return await _cartService.getCarts(storeId, brand);
     } catch (e) {
-      throw Exception(e.toString());
+      rethrow;
     }
   }
 
@@ -51,6 +50,4 @@ class CartUseCase {
       throw Exception(e.toString());
     }
   }
-
-
 }

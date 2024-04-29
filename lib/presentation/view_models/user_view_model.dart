@@ -3,6 +3,7 @@ import 'package:tr_app/domain/entities/user.dart';
 import 'package:tr_app/domain/use_cases/user_use_case.dart';
 import 'package:tr_app/presentation/providers/user_provider.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 // final userNotifierProvider = StateNotifierProvider.autoDispose<UserNotifier, UserState>((ref) {
 //   final userUseCase = ref.watch(userUseCaseProvider);
@@ -77,7 +78,7 @@ class UserNotifier extends StateNotifier<UserState> {
       state = state.resetState();
     } catch (e) {
       state = state.copyWith(
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
+        errorMessage: ErrorHandler.handleErrorMessage(e),
         isLoading: false,
       );
     }
@@ -93,7 +94,7 @@ class UserNotifier extends StateNotifier<UserState> {
       state = state.copyWith(user: user);
     } catch (e) {
       state = state.copyWith(
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
+        errorMessage: ErrorHandler.handleErrorMessage(e),
         isLoading: false,
       );
     }

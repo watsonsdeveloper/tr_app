@@ -87,14 +87,14 @@ class NavigationScreen extends HookConsumerWidget {
                     ? Brand.supplier
                     : Brand.own;
                 await ref.read(userNotifierProvider.notifier).toggleBrand();
-                final user = ref.read(userNotifierProvider).user;
-                if (selectedRoute == Routes.testerRequest) {
-                  ref.read(cartNotifierProvider.notifier).list(user!);
-                } else if (selectedRoute == Routes.orderBatch) {
-                  ref
-                      .read(orderBatchNotifierProvider.notifier)
-                      .list(user!, null);
-                }
+                // final user = ref.read(userNotifierProvider).user;
+                // if (selectedRoute == Routes.cartScreen) {
+                //   ref.read(cartNotifierProvider.notifier).list(user!);
+                // } else if (selectedRoute == Routes.orderBatch) {
+                //   ref
+                //       .read(orderBatchNotifierProvider.notifier)
+                //       .list(user!, null);
+                // }
               },
               child: Consumer(
                 builder: (context, ref, child) {
@@ -130,7 +130,7 @@ class NavigationScreen extends HookConsumerWidget {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushNamedAndRemoveUntil(
                 context,
-                Routes.testerRequest,
+                Routes.cartScreen,
                 (Route<dynamic> route) => false,
               );
             });
@@ -148,7 +148,7 @@ class NavigationScreen extends HookConsumerWidget {
         shape: const StadiumBorder(),
         elevation: 2.0,
         child: Icon(
-            selectedRoute == Routes.testerRequest
+            selectedRoute == Routes.cartScreen
                 ? Icons.barcode_reader
                 : Icons.list_alt,
             color: Colors.white),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/entities/order_batch.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
@@ -14,19 +15,32 @@ class OrderBatchListWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     debugPrint('OrderBatchListWidget @ build');
+    final isLoading = useState<bool>(false);
     return Container(
       padding: const EdgeInsets.all(12),
       height: 500,
       child: RefreshIndicator(
         onRefresh: () async {
-          final user = ref.read(userNotifierProvider).user;
-          ref.read(orderBatchNotifierProvider.notifier).list(user!, null);
+          isLoading.value = true;
+          // TODO : remove error mssage
+          ref.read(orderBatchNotifierProvider).copyWith(errorMessage: '');
+          await ref.refresh(orderBatchFutureProvider.future);
+          if (context.mounted) {
+            isLoading.value = false;
+          }
         },
         child: ref.watch(orderBatchFutureProvider).when(
-              data: (data) => OrderBatchListView(orderBatchList: data),
+              data: (data) => isLoading.value
+                  ? const OrderBatchSkeletonLoadingWidget()
+                  : Consumer(builder: (context, watch, child) {
+                      ref.watch(userNotifierProvider).user;
+                      final data =
+                          ref.watch(orderBatchNotifierProvider).orderBatchList;
+                      return OrderBatchListView(orderBatchList: data ?? []);
+                    }),
               loading: () => const OrderBatchSkeletonLoadingWidget(),
               error: (error, stackTrace) => Center(
-                child: Text(error.toString().replaceAll('Exception: ', '')),
+                child: Text(error.toString()),
               ),
             ),
       ),

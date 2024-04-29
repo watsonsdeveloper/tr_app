@@ -8,6 +8,7 @@ import 'package:tr_app/domain/entities/order_batch.dart';
 import 'package:tr_app/domain/services/order_service.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 import 'package:tr_app/utils/dio_extension.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 class OrderServiceImpl implements OrderService {
   late Dio _dio;
@@ -28,7 +29,7 @@ class OrderServiceImpl implements OrderService {
         "createdBy": createdBy
       };
       final jsonData = jsonEncode(request);
-      debugPrint(jsonData);
+
       Response<dynamic> response =
           await _dio.post('/mobileApi/trOrder/addToTrOrder', data: jsonData);
       if (response.statusCode == 200) {
@@ -42,12 +43,12 @@ class OrderServiceImpl implements OrderService {
               .map((e) => Cart.fromJson(e))
               .toList();
         } else {
-          throw Exception(response.data["errorMessage"]);
+          throw ErrorHandler.handleErrorMessage(response.data["errorMessage"]);
         }
       }
-      return throw Exception(response.data);
+      return throw ErrorHandler.handleErrorMessage(response.data);
     } catch (e) {
-      throw Exception(e.toString());
+      throw ErrorHandler.handleErrorMessage(e.toString());
     }
   }
 
@@ -79,12 +80,12 @@ class OrderServiceImpl implements OrderService {
               .map((e) => OrderBatch.fromJson(e))
               .toList();
         } else {
-          throw Exception(response.data["errorMessage"]);
+          throw ErrorHandler.handleErrorMessage(response.data["errorMessage"]);
         }
       }
-      return throw Exception(response.data);
+      return throw ErrorHandler.handleErrorMessage(response.data);
     } catch (e) {
-      throw Exception(e.toString());
+      throw ErrorHandler.handleErrorMessage(e.toString());
     }
   }
 
@@ -96,10 +97,13 @@ class OrderServiceImpl implements OrderService {
         "trOrderBatchId": trOrderBatchId,
         "storeId": storeId,
         "pluOrBarcode": pluOrBarcode,
-        "status": status.index
+        "status": status.index,
+        "brand": brand.index,
       };
       final jsonData = jsonEncode(request);
-      debugPrint(jsonData);
+
+      await Future.delayed(Duration(seconds: 2));
+
       Response<dynamic> response =
           await _dio.post('/mobileApi/trOrder/getTrOrderList', data: jsonData);
       if (response.statusCode == 200) {
@@ -108,12 +112,12 @@ class OrderServiceImpl implements OrderService {
               .map((e) => Order.fromJson(e))
               .toList();
         } else {
-          throw Exception(response.data["errorMessage"]);
+          throw ErrorHandler.handleErrorMessage(response.data["errorMessage"]);
         }
       }
-      return throw Exception(response.data);
+      return throw ErrorHandler.handleErrorMessage(response.data);
     } catch (e) {
-      throw Exception(e.toString());
+      throw ErrorHandler.handleErrorMessage(e.toString());
     }
   }
 }

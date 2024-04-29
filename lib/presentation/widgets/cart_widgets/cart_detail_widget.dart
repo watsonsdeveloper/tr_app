@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/entities/cart.dart';
-import 'package:tr_app/domain/entities/uploaded_image.dart';
-import 'package:tr_app/presentation/providers/upload_image_provider.dart';
 import 'package:tr_app/presentation/themes/input_theme.dart';
 import 'package:tr_app/presentation/view_models/cart_detail_view_model.dart';
 import 'package:tr_app/presentation/view_models/cart_view_model.dart';
-import 'package:tr_app/presentation/view_models/upload_image_view_model.dart';
 import 'package:tr_app/presentation/widgets/shared/preview_camera_image_widget.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
+import 'package:tr_app/utils/error_handler.dart';
 
 void showCartDetail(BuildContext context, Cart cart, int index) {
   final formKey = GlobalKey<FormState>();
@@ -24,12 +22,46 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
   //   };
   // }, [images]);
 
+  // popContextModalBottomSheet() {}
+
+  void showConfirmDialog(BuildContext context) {
+    showDialog(
+      // handle network slow issue, when request is submitting ,and user want to dismiss action
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text('Dismiss submit'),
+          content: const Text(
+              'Request is submitting.. are you sure you want to dismiss action?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // popContextModalBottomSheet();
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     builder: (BuildContext context) {
       return HookConsumer(
         builder: (context, ref, child) {
+          final isLoading = useState<bool>(false);
           // final Reason reasonState = ref.watch(reasonStateProvider);
           // final justificationController = useTextEditingController();
           // final uploadedImages = ref.watch(uploadImageProvider);
@@ -52,54 +84,79 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
           // }, [cart.trCartId]);
 
           Future<void> submit() async {
-            if (formKey.currentState!.validate()) {
-              final FormState? form = formKey.currentState;
-              if (selectedReason.value == Reason.none) {
-                errorState.value = 'Please select item status.';
-                return;
-              } else if (selectedReason.value != Reason.missing &&
-                  selectedReason.value != Reason.newListing) {
-                if (cart.uploadedImages != null &&
-                    cart.uploadedImages!.isEmpty) {
-                  errorState.value = 'Please take a picture.';
+            if (isLoading.value) return;
+            isLoading.value = true;
+
+            try {
+              if (formKey.currentState!.validate()) {
+                final FormState? form = formKey.currentState;
+                if (selectedReason.value == Reason.none) {
+                  errorState.value = 'Please select item status.';
                   return;
+                } else if (selectedReason.value != Reason.missing &&
+                    selectedReason.value != Reason.newListing) {
+                  if (cart.uploadedImages != null &&
+                      cart.uploadedImages!.isEmpty) {
+                    errorState.value = 'Please take a picture.';
+                    return;
+                  }
+                }
+
+                errorState.value = '';
+                if (form!.validate()) {
+                  final updatedCart = await ref
+                      .read(cartDetailNotifierProvider.notifier)
+                      .updateCartRequirement(cart.trCartId!,
+                          selectedReason.value, justification.value);
+                  if (updatedCart != null &&
+                      updatedCart!.errorMessage != null) {
+                    if (context.mounted) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(updatedCart.errorMessage!),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      });
+                    }
+                  } else {
+                    cart = cart.copyWith(
+                      reason: selectedReason.value,
+                      justification: justification.value,
+                    );
+                    await ref
+                        .read(cartNotifierProvider.notifier)
+                        .updateState(index, cart);
+                    if (context.mounted) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Success message'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+
+                        Navigator.pop(context);
+                      });
+                    }
+                  }
                 }
               }
-
-              errorState.value = '';
-              if (form!.validate()) {
-                final updatedCart = await ref
-                    .read(cartDetailNotifierProvider.notifier)
-                    .updateCartRequirement(cart.trCartId!, selectedReason.value,
-                        justification.value);
-                if (updatedCart != null && updatedCart!.errorMessage != null) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(updatedCart.errorMessage!),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  });
-                } else {
-                  cart = cart.copyWith(
-                    reason: selectedReason.value,
-                    justification: justification.value,
+            } catch (ex) {
+              if (context.mounted) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(ErrorHandler.handleErrorMessage(ex)),
+                      backgroundColor: Colors.red,
+                    ),
                   );
-                  await ref
-                      .read(cartNotifierProvider.notifier)
-                      .updateState(index, cart);
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Success message'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-
-                    Navigator.pop(context);
-                  });
-                }
+                });
+              }
+            } finally {
+              if (context.mounted) {
+                isLoading.value = false;
               }
             }
           }
@@ -126,7 +183,9 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                   ),
                   actions: [
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => !isLoading.value
+                          ? Navigator.pop(context)
+                          : showConfirmDialog(context),
                       icon: const Icon(Icons.close),
                     ),
                   ],
@@ -143,17 +202,13 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                     ),
                     child: Form(
                       key: formKey,
-                      child:
-                          // ref.watch(cartDetailFutureProvider).when(
-                          //       data: (data) =>
-                          Column(
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        // mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           cart.requireJustify != null && cart.requireJustify!
                               ? Text(
-                                  'Justification : ',
+                                  'Remark : ',
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -162,7 +217,6 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                               : const SizedBox.shrink(),
                           cart.requireJustify != null && cart.requireJustify!
                               ? TextFormField(
-                                  // controller: justificationController,
                                   decoration: const InputDecoration(
                                     filled: true,
                                     fillColor: Colors.white,
@@ -171,7 +225,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                                   maxLines: 3,
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return 'Please enter justification.';
+                                      return 'Please enter remark.';
                                     }
                                     justification.value = value;
                                     return null;
@@ -179,13 +233,6 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                                   initialValue: justification.value,
                                 )
                               : const SizedBox.shrink(),
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(vertical: 16),
-                          //   child: Divider(
-                          //     height: 1,
-                          //     color: Colors.grey.shade300,
-                          //   ),
-                          // ),
                           Text(
                             'Reason : ',
                             style: TextStyle(
@@ -201,7 +248,6 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                               'New Listing',
                               style: TextStyle(
                                 fontSize: 14,
-                                // fontWeight: FontWeight.bold,
                                 color: selectedReason.value == Reason.newListing
                                     ? Theme.of(context).primaryColor
                                     : Colors.black,
@@ -223,7 +269,6 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                               'Depleted',
                               style: TextStyle(
                                 fontSize: 14,
-                                // fontWeight: FontWeight.bold,
                                 color: selectedReason.value == Reason.depleted
                                     ? Theme.of(context).primaryColor
                                     : Colors.black,
@@ -245,7 +290,6 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                               'Damaged',
                               style: TextStyle(
                                 fontSize: 14,
-                                // fontWeight: FontWeight.bold,
                                 color: selectedReason.value == Reason.damaged
                                     ? Theme.of(context).primaryColor
                                     : Colors.black,
@@ -264,10 +308,30 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 0, horizontal: 8),
                             title: Text(
+                              'Expired / Upon Expired',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: selectedReason.value == Reason.expired
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.black,
+                              ),
+                            ),
+                            value: Reason.expired,
+                            groupValue: selectedReason.value,
+                            onChanged: (Reason? value) {
+                              selectedReason.value = value!;
+                            },
+                            controlAffinity: ListTileControlAffinity.trailing,
+                            selectedTileColor: Theme.of(context).primaryColor,
+                          ),
+                          RadioListTile<Reason>(
+                            dense: false,
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 0, horizontal: 8),
+                            title: Text(
                               'Missing',
                               style: TextStyle(
                                 fontSize: 14,
-                                // fontWeight: FontWeight.bold,
                                 color: selectedReason.value == Reason.missing
                                     ? Theme.of(context).primaryColor
                                     : Colors.black,
@@ -292,15 +356,17 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                             child: SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: submit,
+                                onPressed: !isLoading.value ? submit : null,
                                 style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(
                                       Theme.of(context).primaryColor),
                                 ),
-                                child: const Text(
-                                  'Submit',
-                                  style: TextStyle(color: Colors.white),
-                                ),
+                                child: isLoading.value
+                                    ? const CircularProgressIndicator()
+                                    : const Text(
+                                        'Submit',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                               ),
                             ),
                           ),
@@ -312,16 +378,6 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                           const SizedBoxHeight(),
                         ],
                       ),
-                      // loading: () => const Center(
-                      //   child: CircularProgressIndicator(),
-                      // ),
-                      // error: (error, stackTrace) => Center(
-                      //   child: Text(
-                      //     error.toString().replaceAll('Exception: ', ''),
-                      //     style: const TextStyle(color: Colors.red),
-                      //   ),
-                      // ),
-                      // ),
                     ),
                   ),
                 ),

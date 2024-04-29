@@ -109,7 +109,7 @@ class OrderItemWidget extends StatelessWidget {
             : const SizedBox(),
         order.justification != null
             ? OrderItemDataRow(
-                'Justification',
+                'Remarks',
                 (order.justification != null &&
                         order.justification!.length > 30)
                     ? '${order.justification.toString().substring(0, 30)}...'

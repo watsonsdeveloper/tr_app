@@ -6,10 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tr_app/domain/entities/uploaded_image.dart';
-import 'package:tr_app/presentation/providers/cart_provider.dart';
-import 'package:tr_app/presentation/providers/upload_image_provider.dart';
 import 'package:tr_app/presentation/view_models/upload_image_view_model.dart';
-import 'package:tr_app/presentation/view_models/user_view_model.dart';
 
 // final uploadedImagesProvider = StateProvider<List<File>>((ref) => []);
 

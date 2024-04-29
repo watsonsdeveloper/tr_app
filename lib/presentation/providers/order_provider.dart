@@ -5,9 +5,9 @@ import 'package:tr_app/domain/entities/order.dart';
 import 'package:tr_app/domain/entities/order_batch.dart';
 import 'package:tr_app/domain/services/order_service.dart';
 import 'package:tr_app/domain/use_cases/order_use_case.dart';
-import 'package:tr_app/presentation/view_models/cart_view_model.dart';
 import 'package:tr_app/presentation/view_models/order_batch_view_model.dart';
 import 'package:tr_app/presentation/view_models/order_view_model.dart';
+import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 
 final orderServiceProvider = Provider<OrderService>((ref) {
@@ -20,8 +20,9 @@ final orderUseCaseProvider = Provider<OrderUseCase>((ref) {
 
 final orderBatchFutureProvider = FutureProvider.autoDispose<List<OrderBatch>>(
   (ref) async {
-    ref.watch(cartNotifierProvider).carts;
-    final orderBatchList = ref.watch(orderBatchNotifierProvider).orderBatchList;
+    final user = ref.watch(userNotifierProvider).user;
+    final orderBatchList =
+        await ref.read(orderBatchNotifierProvider.notifier).list(user!, null);
     return orderBatchList ?? [];
   },
 );
