@@ -2,7 +2,7 @@ enum TrStatus { all, approved, pending, rejected }
 
 enum TrOrderStatus { all, pending, approved, rejected }
 
-enum TrOrderBatchStatus { all, pending, completed, overdue }
+enum TrOrderBatchStatus { all, pending, processed }
 
 enum Reason { none, newListing, damaged, depleted, missing, expired }
 

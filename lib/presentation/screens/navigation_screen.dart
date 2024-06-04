@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:tr_app/presentation/view_models/cart_view_model.dart';
 import 'package:tr_app/presentation/view_models/order_batch_view_model.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
@@ -21,6 +22,7 @@ class NavigationScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    var formatter = NumberFormat('000');
     debugPrint('NavigationScreen @ selectedRoute: $selectedRoute');
     final user = ref.read(userNotifierProvider).user;
     if (user == null) {
@@ -75,7 +77,8 @@ class NavigationScreen extends HookConsumerWidget {
         automaticallyImplyLeading: false,
         leading: null,
         title: Text(
-          '${selectedBrand.value == Brand.own ? 'Own Brand' : 'A Brand'} - ( M${user?.storeId ?? ''} )',
+          // '${selectedBrand.value == Brand.own ? 'Own Brand' : 'A Brand'} - ( M${user?.storeId ?? ''} )',
+          'M${user?.storeId == null ? '' : (user!.storeId.length < 4 ? formatter.format(7) : user.storeId)}',
           softWrap: true,
         ),
         actions: [
@@ -99,7 +102,7 @@ class NavigationScreen extends HookConsumerWidget {
               child: Consumer(
                 builder: (context, ref, child) {
                   return Text(
-                    selectedBrand.value == Brand.own ? 'A' : 'W',
+                    selectedBrand.value == Brand.own ? 'Own Brand' : 'Others',
                     style: TextStyle(
                       color: selectedBrand.value == Brand.own
                           ? Colors.orange
@@ -149,8 +152,8 @@ class NavigationScreen extends HookConsumerWidget {
         elevation: 2.0,
         child: Icon(
             selectedRoute == Routes.cartScreen
-                ? Icons.barcode_reader
-                : Icons.list_alt,
+                ? Icons.list_alt
+                : Icons.shopping_cart,
             color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

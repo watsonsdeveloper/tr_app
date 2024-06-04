@@ -85,7 +85,7 @@ sealed class Order with _$Order {
     String? createdBy,
     DateTime? createdAt,
     DateTime? updatedAt,
-    String? updatedBy,
+    String? updatedBy
   }) = _Order;
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);

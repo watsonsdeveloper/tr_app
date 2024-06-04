@@ -83,7 +83,6 @@ class UploadImageNotifer extends StateNotifier<UploadImageState> {
     try {
       final uploadedImage = await _uploadImageUseCase.uploadImage(
           _user.storeId, cartId, base64Image);
-      // final updatedUploadedImages = [...state.uploadedImages!, uploadedImage];
       state = state.copyWith(isLoading: false);
       return uploadedImage;
     } catch (e) {

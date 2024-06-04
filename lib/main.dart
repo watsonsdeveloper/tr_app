@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -16,10 +18,20 @@ import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/hive_constants.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
 
+class ImageNetworkHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
 
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global =
+      new ImageNetworkHttpOverrides(); // resolve Image.Network SSL HandShake Exception
   Hive.registerAdapter(UserModelAdapter());
   Hive.registerAdapter(GlobalModelAdapter());
   await Hive.initFlutter();

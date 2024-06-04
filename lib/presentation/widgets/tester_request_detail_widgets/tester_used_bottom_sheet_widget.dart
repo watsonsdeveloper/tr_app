@@ -93,7 +93,8 @@ void showTesterUsedModalBottomSheet(BuildContext context) {
                           icon: const Icon(Icons.close),
                         ),
                       ),
-                      const PreviewCameraImageWidget(cartId: 0),
+                      PreviewCameraImageWidget(
+                          cartId: 0, setUploading: () => {}),
                       RadioListTile<Reason>(
                         title: Text(
                           'Depleted',

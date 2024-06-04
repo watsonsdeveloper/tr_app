@@ -7,29 +7,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tr_app/domain/entities/uploaded_image.dart';
 import 'package:tr_app/presentation/view_models/upload_image_view_model.dart';
-
-// final uploadedImagesProvider = StateProvider<List<File>>((ref) => []);
-
-// final uploadedImagesProvider = StateNotifierProvider<>((ref) => []);
+import 'package:tr_app/utils/error_handler.dart';
 
 class PreviewCameraImageWidget extends HookConsumerWidget {
   final int cartId;
+  final Function setUploading;
 
-  const PreviewCameraImageWidget({super.key, required this.cartId});
+  const PreviewCameraImageWidget(
+      {super.key, required this.cartId, required this.setUploading});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final imagesState = ref.read(uploadedImagesProvider);
     final uploadedImages = useState<List<UploadedImage>>([]);
+    final isLoading = useState<bool>(false);
 
     useEffect(() {
-      // ref.read(uploadImageNotifierProvider.notifier).getUploadedImages(cartId);
-      // final user = ref.read(userNotifierProvider).user;
-      // uploadedImages.value = ref
-      //     .read(uploadImageUseCaseProvider)
-      //     .getUploadedImages(user!.storeId, cartId) as List<UploadedImage>;
-      // return null;
-
       Future.delayed(const Duration(seconds: 0), () async {
         uploadedImages.value = await ref
             .read(uploadImageNotifierProvider.notifier)
@@ -40,50 +32,56 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
 
     Future takePhoto() async {
       try {
-        final pickedFile =
-            await ImagePicker().pickImage(source: ImageSource.camera);
+        final pickedFile = await ImagePicker().pickImage(
+            source: ImageSource.camera,
+            maxHeight: 640,
+            maxWidth: 480,
+            imageQuality: 80);
 
         if (pickedFile != null) {
-          // final currentList = ref.read(uploadedImagesProvider.notifier).state;
-          // final currentList = ref.read(uploadedImagesProvider.notifier).state;
-          // final updatedList = List<File>.from(currentList)
-          //   ..add(File(pickedFile.path));
+          if (isLoading.value) return;
+          isLoading.value = true;
+          setUploading(true);
 
           final file = File(pickedFile.path);
           List<int> fileBytes = file.readAsBytesSync();
           String base64Image = base64Encode(fileBytes);
-
-          
 
           final uploadedImage = await ref
               .read(uploadImageNotifierProvider.notifier)
               .uploadImage(cartId, base64Image);
 
           if (uploadedImage != null) {
-            // uploadedImages.value =
-            //     List<UploadedImage>.from(uploadedImages.value)
-            //       ..add(uploadedImage);
             uploadedImages.value = [...uploadedImages.value]
               ..add(uploadedImage);
+          } else {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Failed to upload image',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              );
+            }
           }
 
-          // uploadedImages.value = [
-          //   ...uploadedImages.value,
-          //   UploadedImage(
-          //     cartId: cartId,
-          //     image: base64Image,
-          //     imageUrl: file.path,
-          //   ),
-          // ];
-
-          // ref.read(uploadedImagesProvider.notifier).state = updatedList;
+          if (context.mounted) {
+            isLoading.value = false;
+            setUploading(false);
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(ErrorHandler.handleErrorMessage(e.toString())),
+            ),
+          );
+          isLoading.value = false;
+          setUploading(false);
+        }
       }
     }
 
@@ -93,14 +91,19 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
             .read(uploadImageNotifierProvider.notifier)
             .removeUploadedImage(cartId, removeImage.trImageId!);
         if (isRemoved) {
-          uploadedImages.value = [...uploadedImages.value]..remove(removeImage);
+          if (context.mounted) {
+            uploadedImages.value = [...uploadedImages.value]
+              ..remove(removeImage);
+          }
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(ErrorHandler.handleErrorMessage(e.toString())),
+            ),
+          );
+        }
       }
     }
 
@@ -109,20 +112,10 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
       height: 150,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        // restorationId: uploadedImages.toString(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // ref.watch(uploadedImagesFutureProvider).when(
-            //       data: (data) {
-            //         return Text('Cart ID: ${data.trCartId}');
-            //       },
-            //       loading: () => const CircularProgressIndicator(),
-            //       error: (error, stackTrace) => Text(
-            //         error.toString().replaceAll('Exception: ', ''),
-            //       ),
-            //     ),
             ...uploadedImages.value.map(
               (image) {
                 return Container(
@@ -132,17 +125,20 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
                     children: [
                       Padding(
                           padding: const EdgeInsets.all(8),
-                          // child: Image.file(
-                          //   image,
-                          //   fit: BoxFit.contain,
-                          // ),
                           child: image.imageUrl != null
                               ? SizedBox(
                                   width: 120,
                                   height: 120,
                                   child: Image.network(
                                     image.imageUrl!,
+                                    width: 120,
+                                    height: 120,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace) {
+                                      return Text(exception.toString());
+                                    },
                                   ),
                                 )
                               : const Icon(Icons.image_not_supported_rounded)),
@@ -182,23 +178,37 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
             ),
             uploadedImages.value.length >= 3
                 ? const SizedBox.shrink()
-                : IconButton(
-                    onPressed: takePhoto,
-                    icon: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                      ),
-                    ),
-                    splashColor:
-                        Theme.of(context).primaryColor.withOpacity(0.5),
-                  )
+                : isLoading.value
+                    ? Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const SizedBox(
+                          width: 80,
+                          height: 80,
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: takePhoto,
+                        icon: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                          ),
+                        ),
+                        splashColor:
+                            Theme.of(context).primaryColor.withOpacity(0.5),
+                      )
           ],
         ),
       ),

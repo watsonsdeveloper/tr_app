@@ -21,6 +21,7 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = useState<bool>(false);
     final user = ref.read(userNotifierProvider).user;
+    final brand = user?.selectedBrand;
     final orderBatchSearch =
         ref.watch(orderBatchNotifierProvider).orderBatchSearch;
 
@@ -64,7 +65,9 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
             orderBatchSearch.trOrderStatus,
             orderBatchSearch.pluOrBarcode);
       } catch (e) {
-        errorMessage.value = ErrorHandler.handleErrorMessage(e);
+        if (context.mounted) {
+          errorMessage.value = ErrorHandler.handleErrorMessage(e);
+        }
       } finally {
         if (context.mounted) {
           isLoading.value = false;
@@ -118,7 +121,8 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
                                             Colors.white.withOpacity(0.3),
                                         child: Container(
                                           padding: const EdgeInsets.all(12),
-                                          child: OrderItemWidget(orderItem),
+                                          child: OrderItemWidget(
+                                              orderItem, brand!),
                                         ),
                                       ),
                                     )

@@ -62,6 +62,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
       return HookConsumer(
         builder: (context, ref, child) {
           final isLoading = useState<bool>(false);
+          final isUploading = useState<bool>(false);
           // final Reason reasonState = ref.watch(reasonStateProvider);
           // final justificationController = useTextEditingController();
           // final uploadedImages = ref.watch(uploadImageProvider);
@@ -308,7 +309,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 0, horizontal: 8),
                             title: Text(
-                              'Expired / Upon Expired',
+                              'Expired / Near Expired',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: selectedReason.value == Reason.expired
@@ -348,7 +349,10 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                           selectedReason.value != Reason.none &&
                                   selectedReason.value != Reason.missing &&
                                   selectedReason.value != Reason.newListing
-                              ? PreviewCameraImageWidget(cartId: cart.trCartId!)
+                              ? PreviewCameraImageWidget(
+                                  cartId: cart.trCartId!,
+                                  setUploading: (bool isImageUploading) =>
+                                      isUploading.value = isImageUploading)
                               : const SizedBox.shrink(),
                           Padding(
                             padding: const EdgeInsets.symmetric(
@@ -361,7 +365,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                                   backgroundColor: MaterialStateProperty.all(
                                       Theme.of(context).primaryColor),
                                 ),
-                                child: isLoading.value
+                                child: isLoading.value || isUploading.value
                                     ? const CircularProgressIndicator()
                                     : const Text(
                                         'Submit',

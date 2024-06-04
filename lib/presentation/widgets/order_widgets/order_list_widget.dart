@@ -3,7 +3,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tr_app/domain/entities/order.dart';
 import 'package:tr_app/presentation/providers/order_provider.dart';
 import 'package:tr_app/presentation/themes/constants_theme.dart';
+import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/presentation/widgets/product_image_loader_widget.dart';
+import 'package:tr_app/utils/constants/enum_constants.dart';
+import 'package:tr_app/utils/text_helpers.dart';
 
 class OrderListWidget extends HookConsumerWidget {
   const OrderListWidget({super.key});
@@ -47,13 +50,14 @@ class OrderListWidget extends HookConsumerWidget {
   }
 }
 
-class OrderListView extends StatelessWidget {
+class OrderListView extends HookConsumerWidget {
   final List<Order> list;
 
   const OrderListView({super.key, required this.list});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final brand = ref.read(userNotifierProvider).user?.selectedBrand;
     return
         // InkWell(
         //   onTap: () {
@@ -68,7 +72,7 @@ class OrderListView extends StatelessWidget {
       scrollDirection: Axis.vertical,
       itemCount: list.length,
       itemBuilder: (context, index) {
-        return OrderItemWidget(list[index]);
+        return OrderItemWidget(list[index], brand!);
       },
       separatorBuilder: (context, index) {
         if (index != 2) {
@@ -87,8 +91,9 @@ class OrderListView extends StatelessWidget {
 
 class OrderItemWidget extends StatelessWidget {
   final Order order;
+  final Brand brand;
 
-  const OrderItemWidget(this.order, {super.key});
+  const OrderItemWidget(this.order, this.brand, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -100,12 +105,19 @@ class OrderItemWidget extends StatelessWidget {
         OrderItemDataRow('Plu', order.plu),
         OrderItemDataRow('Product Name', order.productName),
         OrderItemDataRow('Brand', order.brandName),
-        OrderItemDataRow('Supplier Code', order.supplierCode.toString()),
-        OrderItemDataRow('Supplier Name', order.supplierName.toString()),
+        brand == Brand.supplier
+            ? OrderItemDataRow('Supplier Code', order.supplierCode.toString())
+            : const SizedBox.shrink(),
+        brand == Brand.supplier
+            ? OrderItemDataRow('Supplier Name', order.supplierName.toString())
+            : const SizedBox.shrink(),
         // OrderItemDataRow('Created At', order.createdAt.toString()),
         order.reason != null
-            ? OrderItemDataRow('Reason',
-                order.reason != null ? order.reason!.name.toUpperCase() : '')
+            ? OrderItemDataRow(
+                'Reason',
+                order.reason != null
+                    ? order.reason!.name.toString().enumCapitalize()
+                    : '')
             : const SizedBox(),
         order.justification != null
             ? OrderItemDataRow(

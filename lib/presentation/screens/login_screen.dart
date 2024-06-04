@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tr_app/presentation/view_models/login_view_model.dart';
 import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
+import 'package:tr_app/config.dart';
 
 class LoginScreen extends HookConsumerWidget {
   final formKey = GlobalKey<FormState>();
@@ -16,6 +19,17 @@ class LoginScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loginState = ref.watch(loginStateNotifierProvider);
     final loginNotifier = ref.read(loginStateNotifierProvider.notifier);
+    final version = useState<String>("unknown");
+
+    Future<void> initPackageInfo() async {
+      final info = await PackageInfo.fromPlatform();
+      version.value = info.version;
+    }
+
+    useEffect(() {
+      initPackageInfo();
+      return null;
+    }, []);
 
     Future<void> login() async {
       await loginNotifier.resetState();
@@ -56,7 +70,7 @@ class LoginScreen extends HookConsumerWidget {
                   child: Column(
                     children: [
                       const Text(
-                        'Tester App',
+                        'Tester App ${Config.env == 'PROD' ? '' : Config.env}',
                         style: TextStyle(
                           fontSize: 32,
                         ),
@@ -115,6 +129,13 @@ class LoginScreen extends HookConsumerWidget {
                           loginState.errorMessage!.isNotEmpty)
                         Text(loginState.errorMessage!,
                             style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Version ${version.value}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
                       const SizedBox(height: 16),
                     ],
                   ),

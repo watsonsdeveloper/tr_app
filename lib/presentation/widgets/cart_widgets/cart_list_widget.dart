@@ -12,6 +12,7 @@ import 'package:tr_app/presentation/widgets/product_image_loader_widget.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 import 'package:tr_app/utils/constants/routes_constants.dart';
 import 'package:tr_app/utils/error_handler.dart';
+import 'package:tr_app/utils/text_helpers.dart';
 
 class CartListWidget extends HookConsumerWidget {
   const CartListWidget({super.key});
@@ -271,7 +272,8 @@ class CartListWidget extends HookConsumerWidget {
                                             ),
                                             dataRow(
                                                 'Reason : ',
-                                                cart.reason?.name,
+                                                cart.reason?.name
+                                                    .enumCapitalize(),
                                                 'Select a reason.'),
                                             cart.requireJustify!
                                                 ? dataRow(
