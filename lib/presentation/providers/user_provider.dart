@@ -6,6 +6,7 @@ import 'package:tr_app/data/services/user_service.dart';
 import 'package:tr_app/domain/repositories/user_repository.dart';
 import 'package:tr_app/domain/use_cases/user_use_case.dart';
 import 'package:tr_app/presentation/providers/global_provider.dart';
+import 'package:tr_app/presentation/view_models/user_view_model.dart';
 import 'package:tr_app/utils/constants/hive_constants.dart';
 
 final userServiceProvider = Provider<UserServiceImpl>((ref) {

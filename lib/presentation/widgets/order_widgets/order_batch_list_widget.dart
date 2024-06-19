@@ -106,7 +106,7 @@ class OrderBatchListView extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _dataRow('Order:',
+                _dataRow('Order No:',
                     orderBatchList[index].trOrderBatchId.toString(), null),
                 _dataRow('Created By:', orderBatchList[index].createdBy, null),
                 _dataRow('Created At:',

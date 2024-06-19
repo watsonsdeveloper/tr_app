@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:tr_app/config.dart';
 import 'package:tr_app/data/models/user_login_model.dart';
 import 'package:tr_app/domain/entities/global_state.dart';
 import 'package:tr_app/domain/entities/user.dart';
@@ -79,15 +80,36 @@ class UserServiceImpl implements UserService {
       // Response<UserLoginModel> response = Response<UserLoginModel>(
       //     requestOptions: RequestOptions(), statusCode: 200, data: mockData);
 
+      final Map<String, dynamic> loginLogRequest = {
+        "url": url.toString(),
+        "request": jsonEncode(data),
+        "response": response.body,
+      };
+
+      var loginLogResponse = await http.post(
+        Uri.parse('${Config.trv2BaseUrl}/mobileApi/login'),
+        body: jsonEncode(loginLogRequest),
+        headers: {'Content-Type': 'application/json'},
+      );
+
       if (response.statusCode == 200) {
         // UserLoginModel userLoginModel = UserLoginModel.fromJson(response.data);
+
         UserLoginModel userLoginModel =
             UserLoginModel.fromJson(jsonDecode(response.body));
 
         if (userLoginModel.token != null && userLoginModel.message == null) {
+          if (userLoginModel.functions == null ||
+              !userLoginModel.functions!.contains('IA_Approve')) {
+            return throw Exception('User does not have access to this app');
+          }
+
           userLoginModel =
               userLoginModel.copyWith(username: username, password: password);
           return userLoginModel.toUser();
+        }
+        if (userLoginModel.message == 'Username or Password is incorrect') {
+          return throw Exception('Incorrect user ID or password');
         }
         return throw Exception(userLoginModel.message);
       }

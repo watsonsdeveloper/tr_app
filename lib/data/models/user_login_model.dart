@@ -14,6 +14,7 @@ class UserLoginModel {
   final String? loginTime;
   final String? responseCode;
   final String? message;
+  final List<dynamic>? functions;
 
   UserLoginModel({
     this.displayName = '',
@@ -29,24 +30,25 @@ class UserLoginModel {
     this.loginTime = '',
     this.responseCode = '',
     this.message = '',
+    this.functions = const [],
   });
 
   factory UserLoginModel.fromJson(Map<String, dynamic> json) {
     return UserLoginModel(
-      displayName: json['displayName'],
-      username: json['username'],
-      password: json['password'],
-      token: json['token'],
-      firstLogin: json['firstLogin'] ?? false,
-      passwordExpired: json['passwordExpired'] ?? false,
-      allowChangePassword: json['allowChangePassword'] ?? false,
-      storeCode: json['storeCode'],
-      storeName: json['storeName'],
-      ip: json['ip'],
-      loginTime: json['loginTime'],
-      responseCode: json['responseCode'],
-      message: json['message'],
-    );
+        displayName: json['displayName'],
+        username: json['username'],
+        password: json['password'],
+        token: json['token'],
+        firstLogin: json['firstLogin'] ?? false,
+        passwordExpired: json['passwordExpired'] ?? false,
+        allowChangePassword: json['allowChangePassword'] ?? false,
+        storeCode: json['storeCode'] ?? '',
+        storeName: json['storeName'],
+        ip: json['ip'],
+        loginTime: json['loginTime'],
+        responseCode: json['responseCode'],
+        message: json['message'],
+        functions: json['functions']);
   }
 
   Map<String, dynamic> toJson() {
@@ -64,6 +66,7 @@ class UserLoginModel {
       'loginTime': loginTime,
       'responseCode': responseCode,
       'message': message,
+      'functions': functions ?? [],
     };
   }
 

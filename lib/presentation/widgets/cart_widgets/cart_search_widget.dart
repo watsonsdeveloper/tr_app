@@ -80,6 +80,51 @@ class CartSearchWidget extends HookConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(
+            width: 52,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () {
+                if (searchType.value == SearchType.text) {
+                  searchType.value = SearchType.scan;
+                } else if (searchType.value == SearchType.scan) {
+                  searchType.value = SearchType.text;
+                }
+                searchController.clear();
+                searchFocusNode.requestFocus();
+              },
+              style: ButtonStyle(
+                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                  const EdgeInsets.all(0),
+                ),
+                backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.pressed)) {
+                      return Theme.of(context).primaryColor;
+                    } else {
+                      return Theme.of(context).primaryColor.withOpacity(0.5);
+                    }
+                  },
+                ),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                      topRight: Radius.circular(0),
+                      bottomRight: Radius.circular(0),
+                    ),
+                  ),
+                ),
+              ),
+              child: Icon(
+                searchType.value == SearchType.scan
+                    ? Icons.barcode_reader
+                    : Icons.search_outlined,
+                color: Colors.white,
+              ),
+            ),
+          ),
           Expanded(
             child: Column(
               children: [
@@ -92,10 +137,10 @@ class CartSearchWidget extends HookConsumerWidget {
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          bottomLeft: Radius.circular(12),
-                          topRight: Radius.circular(0),
-                          bottomRight: Radius.circular(0),
+                          topLeft: Radius.circular(0),
+                          bottomLeft: Radius.circular(0),
+                          topRight: Radius.circular(12),
+                          bottomRight: Radius.circular(12),
                         ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
@@ -178,51 +223,7 @@ class CartSearchWidget extends HookConsumerWidget {
               ],
             ),
           ),
-          SizedBox(
-            width: 52,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () {
-                if (searchType.value == SearchType.text) {
-                  searchType.value = SearchType.scan;
-                } else if (searchType.value == SearchType.scan) {
-                  searchType.value = SearchType.text;
-                }
-                searchController.clear();
-                searchFocusNode.requestFocus();
-              },
-              style: ButtonStyle(
-                padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                  const EdgeInsets.all(0),
-                ),
-                backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.pressed)) {
-                      return Theme.of(context).primaryColor;
-                    } else {
-                      return Theme.of(context).primaryColor.withOpacity(0.5);
-                    }
-                  },
-                ),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(0),
-                      bottomLeft: Radius.circular(0),
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-              child: Icon(
-                searchType.value == SearchType.scan
-                    ? Icons.search_outlined
-                    : Icons.barcode_reader,
-                color: Colors.white,
-              ),
-            ),
-          ),
+
           // const SizedBox(height: 16),
           // Row(
           //   mainAxisAlignment: MainAxisAlignment.spaceAround,

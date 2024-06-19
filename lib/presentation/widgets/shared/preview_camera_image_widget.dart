@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tr_app/domain/entities/uploaded_image.dart';
 import 'package:tr_app/presentation/view_models/upload_image_view_model.dart';
 import 'package:tr_app/utils/error_handler.dart';
+import 'package:image/image.dart' as img;
 
 class PreviewCameraImageWidget extends HookConsumerWidget {
   final int cartId;
@@ -43,8 +45,15 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
           isLoading.value = true;
           setUploading(true);
 
+          // await FlutterExifRotation.rotateAndSaveImage(path: pickedFile.path);
+          List<int> fileBytes = await File(pickedFile.path).readAsBytes();
+          final img.Image? capturedImage = img.decodeImage(fileBytes);
+          final img.Image orientedImage = img.bakeOrientation(capturedImage!);
+          await File(pickedFile.path)
+              .writeAsBytes(img.encodeJpg(orientedImage));
+
           final file = File(pickedFile.path);
-          List<int> fileBytes = file.readAsBytesSync();
+          fileBytes = file.readAsBytesSync();
           String base64Image = base64Encode(fileBytes);
 
           final uploadedImage = await ref
@@ -109,7 +118,7 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: 150,
+      height: 100,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -120,19 +129,19 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
               (image) {
                 return Container(
                   constraints:
-                      const BoxConstraints(minWidth: 80, minHeight: 150),
+                      const BoxConstraints(minWidth: 70, minHeight: 120),
                   child: Stack(
                     children: [
                       Padding(
                           padding: const EdgeInsets.all(8),
                           child: image.imageUrl != null
                               ? SizedBox(
-                                  width: 120,
-                                  height: 120,
+                                  width: 100,
+                                  height: 100,
                                   child: Image.network(
                                     image.imageUrl!,
-                                    width: 120,
-                                    height: 120,
+                                    width: 100,
+                                    height: 100,
                                     fit: BoxFit.cover,
                                     errorBuilder: (BuildContext context,
                                         Object exception,
@@ -180,8 +189,8 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
                 ? const SizedBox.shrink()
                 : isLoading.value
                     ? Container(
-                        width: 120,
-                        height: 120,
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
                           color: Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(12),
@@ -195,8 +204,8 @@ class PreviewCameraImageWidget extends HookConsumerWidget {
                     : IconButton(
                         onPressed: takePhoto,
                         icon: Container(
-                          width: 120,
-                          height: 120,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
                             color: Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(12),

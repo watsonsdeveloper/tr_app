@@ -277,7 +277,7 @@ class CartListWidget extends HookConsumerWidget {
                                                 'Select a reason.'),
                                             cart.requireJustify!
                                                 ? dataRow(
-                                                    'Justification : ',
+                                                    'Remark : ',
                                                     (cart.justification !=
                                                                 null &&
                                                             cart.justification!

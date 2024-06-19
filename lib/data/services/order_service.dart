@@ -102,8 +102,6 @@ class OrderServiceImpl implements OrderService {
       };
       final jsonData = jsonEncode(request);
 
-      await Future.delayed(Duration(seconds: 2));
-
       Response<dynamic> response =
           await _dio.post('/mobileApi/trOrder/getTrOrderList', data: jsonData);
       if (response.statusCode == 200) {

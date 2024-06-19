@@ -123,6 +123,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                     }
                   } else {
                     cart = cart.copyWith(
+                      errorMessage: '',
                       reason: selectedReason.value,
                       justification: justification.value,
                     );
@@ -133,7 +134,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Success message'),
+                            content: Text('Saved successfully.'),
                             backgroundColor: Colors.green,
                           ),
                         );
@@ -242,7 +243,8 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                                 color: Theme.of(context).primaryColor),
                           ),
                           RadioListTile<Reason>(
-                            dense: false,
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 0, horizontal: 8),
                             title: Text(
@@ -263,7 +265,8 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                             selectedTileColor: Theme.of(context).primaryColor,
                           ),
                           RadioListTile<Reason>(
-                            dense: false,
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 0, horizontal: 8),
                             title: Text(
@@ -284,7 +287,8 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                             selectedTileColor: Theme.of(context).primaryColor,
                           ),
                           RadioListTile<Reason>(
-                            dense: false,
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 0, horizontal: 8),
                             title: Text(
@@ -306,6 +310,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                           ),
                           RadioListTile<Reason>(
                             dense: false,
+                            visualDensity: VisualDensity.compact,
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 0, horizontal: 8),
                             title: Text(
@@ -327,6 +332,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                           ),
                           RadioListTile<Reason>(
                             dense: false,
+                            visualDensity: VisualDensity.compact,
                             contentPadding: const EdgeInsets.symmetric(
                                 vertical: 0, horizontal: 8),
                             title: Text(
@@ -368,7 +374,7 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                                 child: isLoading.value || isUploading.value
                                     ? const CircularProgressIndicator()
                                     : const Text(
-                                        'Submit',
+                                        'Save',
                                         style: TextStyle(color: Colors.white),
                                       ),
                               ),
@@ -379,7 +385,6 @@ void showCartDetail(BuildContext context, Cart cart, int index) {
                               errorState.value,
                               style: const TextStyle(color: Colors.red),
                             ),
-                          const SizedBoxHeight(),
                         ],
                       ),
                     ),

@@ -38,6 +38,12 @@ class NavigationScreen extends HookConsumerWidget {
     // final selectedBrand = user?.selectedBrand ?? Brand.own;
     debugPrint('NavigationScreen @ selectedBrand: $selectedBrand');
 
+    Future toggleBrand() async {
+      selectedBrand.value =
+          selectedBrand.value == Brand.own ? Brand.supplier : Brand.own;
+      await ref.read(userNotifierProvider.notifier).toggleBrand();
+    }
+
     logout() {
       showDialog(
         context: context,
@@ -82,32 +88,68 @@ class NavigationScreen extends HookConsumerWidget {
           softWrap: true,
         ),
         actions: [
+          // SizedBox(
+          //   height: 24,
+          //   child: ElevatedButton(
+          //     onPressed: () async {
+          //       selectedBrand.value = selectedBrand.value == Brand.own
+          //           ? Brand.supplier
+          //           : Brand.own;
+          //       await ref.read(userNotifierProvider.notifier).toggleBrand();
+          //     },
+          //     child: Consumer(
+          //       builder: (context, ref, child) {
+          //         return Text(
+          //           selectedBrand.value == Brand.own ? 'Own Brand' : 'Others',
+          //           style: TextStyle(
+          //             color: selectedBrand.value == Brand.own
+          //                 ? Colors.orange
+          //                 : Theme.of(context).primaryColor,
+          //             fontSize: 20,
+          //             fontWeight: FontWeight.bold,
+          //             fontFamily: 'Comic Sans MS',
+          //           ),
+          //         );
+          //       },
+          //     ),
+          //   ),
+          // ),
           SizedBox(
             height: 24,
             child: ElevatedButton(
-              onPressed: () async {
-                selectedBrand.value = selectedBrand.value == Brand.own
-                    ? Brand.supplier
-                    : Brand.own;
-                await ref.read(userNotifierProvider.notifier).toggleBrand();
-                // final user = ref.read(userNotifierProvider).user;
-                // if (selectedRoute == Routes.cartScreen) {
-                //   ref.read(cartNotifierProvider.notifier).list(user!);
-                // } else if (selectedRoute == Routes.orderBatch) {
-                //   ref
-                //       .read(orderBatchNotifierProvider.notifier)
-                //       .list(user!, null);
-                // }
-              },
+              onPressed: selectedBrand.value == Brand.own ? null : toggleBrand,
               child: Consumer(
                 builder: (context, ref, child) {
                   return Text(
-                    selectedBrand.value == Brand.own ? 'Own Brand' : 'Others',
+                    'Own Brand',
                     style: TextStyle(
                       color: selectedBrand.value == Brand.own
-                          ? Colors.orange
+                          ? Colors.grey
                           : Theme.of(context).primaryColor,
-                      fontSize: 20,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Comic Sans MS',
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          SizedBox(
+            height: 24,
+            child: ElevatedButton(
+              onPressed:
+                  selectedBrand.value == Brand.supplier ? null : toggleBrand,
+              child: Consumer(
+                builder: (context, ref, child) {
+                  return Text(
+                    'Others',
+                    style: TextStyle(
+                      color: selectedBrand.value == Brand.supplier
+                          ? Colors.grey
+                          : Theme.of(context).primaryColor,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Comic Sans MS',
                     ),

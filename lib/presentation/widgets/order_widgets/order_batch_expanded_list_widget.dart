@@ -64,6 +64,7 @@ class OrderBatchExpandedListWidget extends HookConsumerWidget {
             user.selectedBrand,
             orderBatchSearch.trOrderStatus,
             orderBatchSearch.pluOrBarcode);
+
       } catch (e) {
         if (context.mounted) {
           errorMessage.value = ErrorHandler.handleErrorMessage(e);

@@ -4,12 +4,14 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:tr_app/config.dart';
 import 'package:tr_app/domain/entities/cart.dart';
 import 'package:tr_app/domain/services/cart_service.dart';
 import 'package:tr_app/utils/constants/enum_constants.dart';
 import 'package:tr_app/utils/dio_extension.dart';
 import 'package:tr_app/utils/error_handler.dart';
 import 'package:tr_app/utils/http_client.dart';
+import 'package:http/http.dart' as http;
 
 class CartServiceImpl implements CartService {
   late Dio _dio;
@@ -35,12 +37,19 @@ class CartServiceImpl implements CartService {
         "createdBy": createdBy
       };
 
-      final response =
-          await Http.post("/mobileApi/trCart/addToTrCart", request);
+      // final response =
+      //     await Http.post("/mobileApi/trCart/addToTrCart", request);
+
+      final response = await http.post(
+        Uri.parse('${Config.trv2BaseUrl}/mobileApi/trCart/addToTrCart'),
+        body: jsonEncode(request),
+        headers: {'Content-Type': 'application/json'},
+      );
 
       if (response.statusCode == HttpStatus.ok) {
-        final responseBody = await readResponse(response);
-        final json = jsonDecode(responseBody);
+        // final responseBody = await readResponse(response);
+        // final json = jsonDecode(responseBody);
+        final json = jsonDecode(response.body);
 
         if (json["isSuccess"]) {
           return Cart.fromJson(json["data"]);
@@ -73,12 +82,19 @@ class CartServiceImpl implements CartService {
         "brand": brand.index.toString()
       };
 
-      final response =
-          await Http.get("/mobileApi/trCart/getTrCartList", queryParameters);
+      // final response =
+      //     await Http.get("/mobileApi/trCart/getTrCartList", queryParameters);
+
+      final response = await http.get(
+        Uri.parse(
+            '${Config.trv2BaseUrl}/mobileApi/trCart/getTrCartList?${Uri(queryParameters: queryParameters).query}'),
+        headers: {'Content-Type': 'application/json'},
+      );
 
       if (response.statusCode == HttpStatus.ok) {
-        final responseBody = await readResponse(response);
-        final json = jsonDecode(responseBody);
+        // final responseBody = await readResponse(response);
+        // final json = jsonDecode(responseBody);
+        final json = jsonDecode(response.body);
 
         if (json["isSuccess"]) {
           final cartList =

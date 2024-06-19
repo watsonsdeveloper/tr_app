@@ -1,6 +1,15 @@
 enum TrStatus { all, approved, pending, rejected }
 
-enum TrOrderStatus { all, pending, approved, rejected }
+enum TrOrderStatus {
+  all,
+  pending,
+  approved,
+  rejected,
+  processed,
+  fulfilled,
+  unfulfilled,
+  cancelled
+}
 
 enum TrOrderBatchStatus { all, pending, processed }
 
