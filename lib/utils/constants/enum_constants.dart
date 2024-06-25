@@ -5,13 +5,12 @@ enum TrOrderStatus {
   pending,
   approved,
   rejected,
-  processed,
+  processing,
   fulfilled,
-  unfulfilled,
-  cancelled
+  unfulfilled
 }
 
-enum TrOrderBatchStatus { all, pending, processed }
+enum TrOrderBatchStatus { all, pending, processed, processing }
 
 enum Reason { none, newListing, damaged, depleted, missing, expired }
 

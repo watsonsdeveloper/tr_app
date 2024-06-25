@@ -12,6 +12,7 @@ const trCartStatusColors = {
 };
 
 const trOrderBatchStatusColors = {
+  TrOrderBatchStatus.processing: Colors.blue,
   TrOrderBatchStatus.processed: Colors.green,
   TrOrderBatchStatus.pending: Colors.orange,
   TrOrderBatchStatus.all: Colors.blue,
@@ -21,5 +22,8 @@ const trOrderStatusColors = {
   TrOrderStatus.approved: Colors.green,
   TrOrderStatus.pending: Colors.orange,
   TrOrderStatus.rejected: Colors.red,
+  TrOrderStatus.processing: Colors.blue,
+  TrOrderStatus.fulfilled: Colors.green,
+  TrOrderStatus.unfulfilled: Colors.red,
   TrOrderStatus.all: Colors.blue,
 };
