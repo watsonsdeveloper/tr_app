@@ -86,7 +86,7 @@ class UserServiceImpl implements UserService {
         "response": response.body,
       };
 
-      var loginLogResponse = await http.post(
+      await http.post(
         Uri.parse('${Config.trv2BaseUrl}/mobileApi/login'),
         body: jsonEncode(loginLogRequest),
         headers: {'Content-Type': 'application/json'},
@@ -105,7 +105,7 @@ class UserServiceImpl implements UserService {
           }
 
           userLoginModel =
-              userLoginModel.copyWith(username: username, password: password);
+            userLoginModel.copyWith(username: username, password: password);
           return userLoginModel.toUser();
         }
         if (userLoginModel.message == 'Username or Password is incorrect') {

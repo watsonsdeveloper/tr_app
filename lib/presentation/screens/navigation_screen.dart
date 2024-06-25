@@ -84,7 +84,7 @@ class NavigationScreen extends HookConsumerWidget {
         leading: null,
         title: Text(
           // '${selectedBrand.value == Brand.own ? 'Own Brand' : 'A Brand'} - ( M${user?.storeId ?? ''} )',
-          'M${user?.storeId == null ? '' : (user!.storeId.length < 4 ? formatter.format(7) : user.storeId)}',
+          'M${user?.storeId == null ? '' : (user!.storeId.length < 4 ? formatter.format(int.parse(user.storeId)) : user.storeId)}',
           softWrap: true,
         ),
         actions: [
